@@ -28,20 +28,6 @@ class dataset:
 		self.data_label = []
 		self.start_time = datetime.datetime.now()
 
-	def flipupdown(self, current_image, label):
-	## transformation that flips the image on the x axis
-		flip_image = numpy.flipud(current_image)
-		images = numpy.hstack(flip_image)
-		self.training_data.append(images)
-		self.training_label.append(label)
-
-	def flipleftright(self, current_image,label):
-	## transformation that flips the image on the y axis
-		current_image = numpy.fliplr(current_image)
-		images = numpy.hstack(current_image)
-		self.training_data.append(images)
-		self.training_label.append(label)
-
 
 	def DSetGlobal(self, directory = '/home/musk/tb-CNN/data/shuffled'):
 	## Find files in folders
@@ -65,7 +51,6 @@ class dataset:
                  except IOError:
                      print(filename)
                  #scipy.misc.imshow(current_image) ##shows the image being read 
-
            
          combined = zip(self.data, self.data_label)
          random.shuffle(combined)
@@ -86,15 +71,15 @@ class dataset:
          y = range(len(x))
          seg_data = []
          counter = 0
-         fun = 0
+         #fun = 0
          size = int(len(y)/5.0)
          while counter < ndataset:
              z = random.sample(y, size)
-             lmda = 0.01
+             lmda = 0.035
              ratio = float(sum(z))/(float(len(z)*10000))
              dif = math.fabs(ratio-0.621883)
              if dif < lmda:
-                 print('BINGO!')
+                 print('BINGO!', counter, dif)
                  y = [i for i in y if i not in z]
                  current_label = [x[i] for i in z]
                  current_data = [w[i] for i in z]
@@ -102,12 +87,52 @@ class dataset:
                  counter+=1
              else:
                  #print('Does not have a acceptable ratio', ratio, dif)
-                 fun+= 1
-                 print(fun)
+                 #fun+= 1
+                 pass 
          f = file('seg_MODS_data_2.pkl', 'wb')
          cPickle.dump(seg_data, f, protocol=cPickle.HIGHEST_PROTOCOL)
          f.close()
+         
+	def Djoin(self, name='seg_MODS_data_2.pkl'):
+         f = file(name, 'rb')
+         datamama = cPickle.load(f)
+         f.close()
+         for i in xrange(len(datamama)):
+             data_join = []
+             data_label_join = []
+             validation = datamama[i]
+             data_temp = datamama[:i] + datamama[i+1:]
+             for j in data_temp:
+                 data_join+=j[0]
+                 data_label_join+=j[1]
+             
+             ##Shuffle data
+             combined = zip(data_join, data_label_join)
+             random.shuffle(combined)
+             data_join[:], data_label_join[:] = zip(*combined)                 
+            
+             training = [data_join,data_label_join]
+             dataset_new = [training,validation]
+             f = file('MODS_dataset_cv_{0}.pkl'.format(i),'wb')
+             cPickle.dump(dataset_new, f, protocol=cPickle.HIGHEST_PROTOCOL)
+             f.close()
+             
+	def flipupdown(self, current_image, label):
+	## transformation that flips the image on the x axis
+		flip_image = numpy.flipud(current_image)
+		images = numpy.hstack(flip_image)
+		self.training_data.append(images)
+		self.training_label.append(label)
 
+	def flipleftright(self, current_image,label):
+	## transformation that flips the image on the y axis
+		current_image = numpy.fliplr(current_image)
+		images = numpy.hstack(current_image)
+		self.training_data.append(images)
+		self.training_label.append(label)
+  
+	def data_augment(self, ):
+		#scipy.misc.imshow(current_image) ##shows the image being read 
 
 '''
 
