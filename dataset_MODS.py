@@ -132,10 +132,17 @@ class dataset:
 		self.training_label.append(label)
   
 	def data_augment(self, ):
-		#scipy.misc.imshow(current_image) ##shows the image being read 
+		pass
+		#scipy.misc.imshow(current_image) ##shows the image being read
+		#import skimage
+		#from skimage transform as tf
+		#b = tf.rotate('image', 20.0)
+		#scipy.misc.imshow(b)
+          
+
+
 
 '''
-
 directory = '/home/musk/tb-CNN/data/shuffled'
 for dirname in (next(os.walk('.'))[1]): ##dirname: positive and negative
 	f2 = os.path.join(directory,dirname)
