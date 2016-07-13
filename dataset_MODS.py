@@ -56,7 +56,6 @@ class dataset:
 			label = 1
              else:
 			label = 0
-			#Con esta linea consigo cada imagen independientemente
              for filename in onlyfiles:
                  try:
                      current_image = scipy.misc.imread(os.path.join(f2,filename), mode='L')
@@ -90,7 +89,8 @@ class dataset:
              ratio = float(sum(z))/(float(len(z)*10000))
              dif = math.fabs(ratio-0.621883)
              if dif < lmda:
-                 del y[z]
+                 #del y[z]
+                 y = [i for i in y if i not in z]
                  current_label = x[z]
                  current_data = w[z]
                  seg_data.append([current_data, current_label])
@@ -100,6 +100,7 @@ class dataset:
          f = file('seg_MODS_data.pkl', 'wb')
          cPickle.dump(seg_data, f, protocol=cPickle.HIGHEST_PROTOCOL)
          f.close()
+
 
 '''
 
