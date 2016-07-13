@@ -77,29 +77,34 @@ class dataset:
          f.close()
          print(datetime.datetime.now() - self.start_time)
 
-	def Dset(self, ndataset=5):
-         x = self.data_label
-         w = self.data
+	def Dset(self, ndataset=5, name='MODS_data.pkl'):
+         f = file(name, 'rb')
+         datapapa = cPickle.load(f)
+         f.close()    
+         w = datapapa[0]
+         x = datapapa[1]
          y = range(len(x))
          seg_data = []
          counter = 0
+         fun = 0
+         size = int(len(y)/5.0)
          while counter < ndataset:
-             z = random.sample(y, int(len(y)/5.0))
-             lmda = 0.05
+             z = random.sample(y, size)
+             lmda = 0.01
              ratio = float(sum(z))/(float(len(z)*10000))
              dif = math.fabs(ratio-0.621883)
              if dif < lmda:
-                 #del y[z]
+                 print('BINGO!')
                  y = [i for i in y if i not in z]
-                 #current_label = x[z]
                  current_label = [x[i] for i in z]
-                 #current_data = w[z]
                  current_data = [w[i] for i in z]
                  seg_data.append([current_data, current_label])
                  counter+=1
              else:
-                 print('Does not have a acceptable ratio', ratio, dif)
-         f = file('seg_MODS_data.pkl', 'wb')
+                 #print('Does not have a acceptable ratio', ratio, dif)
+                 fun+= 1
+                 print(fun)
+         f = file('seg_MODS_data_2.pkl', 'wb')
          cPickle.dump(seg_data, f, protocol=cPickle.HIGHEST_PROTOCOL)
          f.close()
 
