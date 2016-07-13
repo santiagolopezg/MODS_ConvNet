@@ -91,8 +91,10 @@ class dataset:
              if dif < lmda:
                  #del y[z]
                  y = [i for i in y if i not in z]
-                 current_label = x[z]
-                 current_data = w[z]
+                 #current_label = x[z]
+                 current_label = [x[i] for i in z]
+                 #current_data = w[z]
+                 current_data = [w[i] for i in z]
                  seg_data.append([current_data, current_label])
                  counter+=1
              else:
