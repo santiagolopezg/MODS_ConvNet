@@ -14,6 +14,7 @@ import cPickle
 import random
 import math
 import datetime
+from skimage import transform as tf
 
 class dataset:
 	def __init__(self):
@@ -27,6 +28,8 @@ class dataset:
 		self.data = []
 		self.data_label = []
 		self.start_time = datetime.datetime.now()
+		self.ndataset = 5
+		self.deg = 20.0
 
 
 	def DSetGlobal(self, directory = '/home/musk/tb-CNN/data/shuffled'):
@@ -62,7 +65,7 @@ class dataset:
          f.close()
          print(datetime.datetime.now() - self.start_time)
 
-	def Dset(self, ndataset=5, name='MODS_data.pkl'):
+	def Dset(self, ndataset, name='MODS_data.pkl'):
          f = file(name, 'rb')
          datapapa = cPickle.load(f)
          f.close()    
@@ -117,101 +120,51 @@ class dataset:
              cPickle.dump(dataset_new, f, protocol=cPickle.HIGHEST_PROTOCOL)
              f.close()
              
-	def flipupdown(self, current_image, label):
-	## transformation that flips the image on the x axis
-		flip_image = numpy.flipud(current_image)
-		images = numpy.hstack(flip_image)
-		self.training_data.append(images)
-		self.training_label.append(label)
-
-	def flipleftright(self, current_image,label):
-	## transformation that flips the image on the y axis
-		current_image = numpy.fliplr(current_image)
-		images = numpy.hstack(current_image)
-		self.training_data.append(images)
-		self.training_label.append(label)
-  
-	def data_augment(self, ):
-		pass
-		#scipy.misc.imshow(current_image) ##shows the image being read
-		#import skimage
-		#from skimage transform as tf
-		#b = tf.rotate('image', 20.0)
+	def aug(self, current_image, label, deg):
+         data = []
+         data_label = []
+         flip_image = numpy.flipud(current_image)
+         data.append(numpy.hstack(flip_image))         
+         a = numpy.fliplr(flip_image)
+         b = numpy.fliplr(current_image)
+         data.append(numpy.hstack(a))
+         data.append(numpy.hstack(b))
+         data_label += 3*[label]
+         
+         for i in xrange(int(360/deg -1)):
+             data.append(numpy.hstack(tf.rotate(current_image, deg)))
+             data.append(numpy.hstack(tf.rotate(flip_image, deg)))
+             data.append(numpy.hstack(tf.rotate(a, deg)))
+             data.append(numpy.hstack(tf.rotate(b, deg)))
+             data_label += 4*[label]
+         return data, data_label
 		#scipy.misc.imshow(b)
+
+  
+	def data_augment(self, deg=20.0):
+         for i in xrange(self.ndataset):
+             f = file('MODS_dataset_cv_{0}.pkl'.format(i),'rb')
+             data = cPickle.load(f)
+             training = data[0]
+             f.close()
+             for j in xrange(len(training[0])):
+                 current_image = numpy.reshape(training[0][j], (256, 192))
+                 label = training[1][j]
+                 images, labels = self.aug(current_image, label, deg)
+                 training[0] += images
+                 training[1] += labels
+                 
+             f = file('MODS_dataset_cv_aug_{0}.pkl'.format(i),'wb')
+             dataset_new = [training, data[1]]
+             cPickle.dump(dataset_new, f, protocol=cPickle.HIGHEST_PROTOCOL)
+             f.close()
+             print('Finished dataset {0}'.format(i))
+             
+        
+                 
+                 
+        
+    		#scipy.misc.imshow(current_image) ##shows the image being read
+		#
+
           
-
-
-
-'''
-directory = '/home/musk/tb-CNN/data/shuffled'
-for dirname in (next(os.walk('.'))[1]): ##dirname: positive and negative
-	f2 = os.path.join(directory,dirname)
-	onlyfiles = [ f3 for f3 in os.listdir(f2) if os.path.isfile(os.path.join(f2,f3)) ]		
-	suffix = dirname
-	if suffix == 'positive':
-		label = 1
-	else:
-		label = 0
-	#Con esta linea consigo cada imagen independientemente
-	for filename in onlyfiles:
-		current_image = scipy.misc.imread(os.path.join(f2,filename))
-		current_image = current_image
-		training_data.append(numpy.hstack(current_image))
-		training_label.append(label)
-
-		flip_image = numpy.flipud(current_image)
-		images = numpy.hstack(flip_image)
-		training_data.append(images)
-		training_label.append(label)
-
-		current_hori_image = numpy.fliplr(current_image)
-		images = numpy.hstack(current_hori_image)
-		training_data.append(images)
-		training_label.append(label)
-		
-		flip_hori_image = numpy.fliplr(flip_image)
-		images = numpy.hstack(flip_hori_image)
-		training_data.append(images)
-		training_label.append(label)
-		trans_new = scipy.misc.imresize(current_image,(462,462),interp='cubic')
-
-for subdirname in validation_folder:
-	f2 = os.path.join(directory,dirname,subdirname)
-	onlyfiles = [ f3 for f3 in os.listdir(f2) if os.path.isfile(os.path.join(f2,f3)) ]		
-	suffix = f2[len(f2)-2:len(f2)]
-	if suffix == 'Ne':
-		label = 1
-	else:
-		label = 0
-	for filename in onlyfiles:
-		current_image = scipy.misc.imread(os.path.join(f2,f3))
-		current_image = current_image/255.0
-		validation_data.append(numpy.hstack(current_image))
-		validation_label.append(label)
-for subdirname in test_folder:
-	f2 = os.path.join(directory,dirname,subdirname)
-	onlyfiles = [ f3 for f3 in os.listdir(f2) if os.path.isfile(os.path.join(f2,f3)) ]		
-	suffix = f2[len(f2)-2:len(f2)]
-	if suffix == 'Ne':
-		label = 1
-	else:
-		label = 0
-	for filename in onlyfiles:
-		current_image = scipy.misc.imread(os.path.join(f2,f3))
-		current_image = current_image/255.0
-		test_data.append(numpy.hstack(current_image))
-		test_label.append(label)
-
-combined = zip(training_data, training_label)
-random.shuffle(combined)
-training_data[:], training_label[:] = zip(*combined)
-
-print len(training_data)
-
-
-neumonia_dataset = [training_data, training_label],[validation_data, validation_label],[test_data,test_label]
-
-f = file('neumonia_dataset_new_11.pkl','wb')
-cPickle.dump(neumonia_dataset, f, protocol=cPickle.HIGHEST_PROTOCOL)
-f.close()
-'''

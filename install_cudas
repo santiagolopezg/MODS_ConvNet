@@ -1,0 +1,137 @@
+Using the following links as guidelines:
+http://www.chioka.in/how-to-setup-theano-to-run-on-gpu-on-ubuntu-14-04-with-nvidia-geforce-gtx-780/
+http://www.johnwittenauer.net/configuring-theano-for-high-performance-deep-learning/
+
+1. Install Ubuntu (14.04)
+
+2. Run the following code to get OS up to date: 
+sudo apt-get install terminator
+sudo apt-get update  
+sudo apt-get upgrade  
+sudo apt-get install build-essential  
+sudo apt-get autoremove
+
+3. Install Git:
+sudo apt-get install git  
+
+4. Get fortran compiler:
+sudo apt-get install gfortran  
+
+5. Retrieve and build OpenBLAS:
+mkdir git
+cd git  
+git clone https://github.com/xianyi/OpenBLAS  
+cd OpenBLAS  
+make FC=gfortran  
+sudo make PREFIX=/usr/local install
+
+6. Download Nvidia display drivers + CDA run file:
+wget http://us.download.nvidia.com/XFree86/Linux-x86_64/352.63/NVIDIA-Linux-x86_64-352.63.run && wget http://developer.download.nvidia.com/compute/cuda/7.5/Prod/local_installers/cuda_7.5.18_linux.run
+
+7. In terminal, do the following:
+
+sudo nano /etc/modprobe.d/blacklist.conf 
+
+blacklist amd76x_edac 
+blacklist vga16fb 
+blacklist nouveau 
+blacklist rivafb 
+blacklist nvidiafb 
+blacklist rivatv
+
+- reboot, then don't log in, and alt+control+F2 - 
+sudo service lightdm stop 
+sudo chmod +x NVIDIA-Linux-x86_64-352.63.run
+sudo ./NVIDIA-Linux-x86_64-352.63.run
+sudo reboot
+
+- again, don't log in -- alt+control+F2 and
+sudo service lightdm stop
+sudo chmod +x cuda_7.5.18_linux.run
+sudo ./cuda_7.5.18_linux.run
+
+8. Check that everything is going good with 'nvidia-smi'. If it is, then download Anaconda2-2.5.0-Linux-x86_64.sh, and install it: 'bash Anaconda2-2.5.0-Linux-x86_64.sh'
+
+9. Additionally, run the following:
+
+sudo apt-get install g++
+conda update conda  
+conda update anaconda  
+conda install pydot  
+conda install theano
+conda update theano  
+
+
+{if at any point, you get the message 'conda: command not found', then run this: export PATH="/home/{username}/anaconda2/bin:$PATH"
+I found that this also tends to happen with theano. When getting the message 'theano module not found' or something of the sort, run the script, or try rebooting.}
+
+10. Create .theanorc in home directory:
+sudo gedit .theanorc
+[global]
+device = gpu  
+floatX = float32
+
+[blas]
+ldflags = -L/usr/local/lib -lopenblas
+
+[nvcc]
+fastmath = True
+
+[cuda]
+root = /usr/local/cuda-7.5/
+
+11. Then, in your home directory, open .bashrc and add the following:
+
+export PATH="/usr/local/cuda-7.5/bin:/usr/bin:/bin:/sbin:PATH"
+export LD_LIBRARY_PATH="/usr/local/cuda-7.5/lib"
+Put this right before the PATH export commanded by Anaconda's installer.
+
+12. If you don't see the following in the .bashrc file, put it in:
+# added by Anaconda2 2.5.0 installer
+export PATH="/home/{username}/anaconda2/bin:$PATH"
+Be sure to add this last, so as to have it be the last command executed.
+
+13. Create a file in home directory and put this in:
+sudo gedit theano_test.py
+from theano import function, config, shared, sandbox  
+import theano.tensor as T  
+import numpy  
+import time
+
+vlen = 10 * 30 * 768  # 10 x #cores x # threads per core  
+iters = 1000
+
+rng = numpy.random.RandomState(22)  
+x = shared(numpy.asarray(rng.rand(vlen), config.floatX))  
+f = function([], T.exp(x))  
+print f.maker.fgraph.toposort()  
+t0 = time.time()  
+for i in xrange(iters):  
+    r = f()
+t1 = time.time()  
+print 'Looping %d times took' % iters, t1 - t0, 'seconds'  
+print 'Result is', r  
+if numpy.any([isinstance(x.op, T.Elemwise) for x in f.maker.fgraph.toposort()]):  
+    print 'Used the cpu'
+else:  
+    print 'Used the gpu'
+
+14. Reboot the computer, and run this in terminal:
+python theano_test.py
+
+15. If everything went smoothly, the 'Used the gpu' message should print out. If it doesn't, try the following:
+
+-if at any point, you get the message 'conda: command not found', then run this: export PATH="/home/{username}/anaconda2/bin:$PATH"
+I found that this also tends to happen with theano. When getting the message 'theano module not found' or something of the sort, run the script, or try rebooting. Best option is to put this PATH change last in .bashrc
+
+When running theano_test.py, I sometimes get the error 'Couldn't import dot_parser, loading of dot files will not be possible.' To fix this, run the following code:
+pip uninstall pyparsing
+pip install -Iv https://pypi.python.org/packages/source/p/pyparsing/pyparsing-1.5.7.tar.gz#md5=9be0fcdcc595199c646ab317c1d9a709
+pip install pydot
+
+Close terminal, and reboot. Try python theano_test.py again.
+
+Haven't had to use this:
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-7.5/lib64:
+export LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-7.5/lib64:
+export PATH=$PATH:/usr/local/cuda-7.5/bin
