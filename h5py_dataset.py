@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Jul 15 16:29:31 2016
+
+@author: musk
+"""
+
 
 """
 code to build dataset for ConvNet training on Tuberculosis MODS images.
@@ -16,6 +23,7 @@ import math
 import datetime
 from skimage import transform as tf
 import gc
+import h5py
 
 
 class dataset:
@@ -125,18 +133,18 @@ class dataset:
          data = []
          data_label = []
          flip_image = numpy.flipud(current_image)
-         data.append(numpy.hstack(flip_image))         
+         data.append(flip_image)         
          a = numpy.fliplr(flip_image)
          b = numpy.fliplr(current_image)
-         data.append(numpy.hstack(a))
-         data.append(numpy.hstack(b))
+         data.append(a)
+         data.append(b)
          data_label += 3*[label]
          
          for i in xrange(int(360/deg -1)):
-             data.append(numpy.hstack(tf.rotate(current_image, deg)))
-             data.append(numpy.hstack(tf.rotate(flip_image, deg)))
-             data.append(numpy.hstack(tf.rotate(a, deg)))
-             data.append(numpy.hstack(tf.rotate(b, deg)))
+             data.append(tf.rotate(current_image, deg))
+             data.append(tf.rotate(flip_image, deg))
+             data.append(tf.rotate(a, deg))
+             data.append(tf.rotate(b, deg))
              data_label += 4*[label]
          gc.collect()
          return data, data_label
@@ -157,9 +165,10 @@ class dataset:
                  training[1] += labels
                  gc.collect()
                  print(j)
-             f = file('MODS_dataset_cv_aug_{0}.pkl'.format(i),'wb')
+                 
+             f = h5py.File('MODS_dataset_cv_aug_{0}.h5'.format(i),'w')
              dataset_new = [training, data[1]]
-             cPickle.dump(dataset_new, f, protocol=cPickle.HIGHEST_PROTOCOL)
+             f.create_dataset('dataset_{0}'.format(i), data=dataset_new)
              f.close()
              gc.collect()
              print('Finished dataset {0}'.format(i))
