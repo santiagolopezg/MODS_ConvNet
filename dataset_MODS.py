@@ -119,6 +119,11 @@ class dataset:
              f = file('MODS_dataset_cv_{0}.pkl'.format(i),'wb')
              cPickle.dump(dataset_new, f, protocol=cPickle.HIGHEST_PROTOCOL)
              f.close()
+
+
+
+
+'''
              
 	def aug(self, current_image, label, deg):
          gc.enable
@@ -168,4 +173,4 @@ class dataset:
     		#scipy.misc.imshow(current_image) ##shows the image being read
 		#
 
-          
+'''         
