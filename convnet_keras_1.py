@@ -4,6 +4,7 @@ Created on Tue Jul 19 10:18:36 2016
 
 @author: SLG
 """
+
 import keras
 from keras.models import Sequential
 from keras.layers.core import Dense, Dropout, Activation, Flatten
@@ -15,7 +16,7 @@ import numpy as np
 from keras.regularizers import l1l2
 from keras.layers.normalization import BatchNormalization
 from keras.callbacks import EarlyStopping
-from scipy.stats import ttest_ind
+#from scipy.stats import ttest_ind
 
 
 class LossHistory(keras.callbacks.Callback):
@@ -128,7 +129,7 @@ def cv_calc(n_dataset, regl1, regl2, weight_init, dropout, optimize, bsize):
             vertical_flip=True,
             )
         model.fit_generator(train_datagen.flow(X_train, Y_train, batch_size=bsize),
-                    samples_per_epoch=len(X_train), nb_epoch=10, callbacks = [early_stopping, history]) 
+                    samples_per_epoch=len(X_train), nb_epoch=40, callbacks = [early_stopping, history]) 
                     
         
         prediction = model.predict(X_val,batch_size=Y_val.shape[0])
@@ -193,17 +194,6 @@ def cv_calc(n_dataset, regl1, regl2, weight_init, dropout, optimize, bsize):
         
         return stat, model
 
-def compare_data(best_models,stat,model):
-    sens = stat[1][0,:]
-    for m in xrange(len(best_models)):
-        sens_best = best_models[m][1]
-        None, p_value = ttest_ind(sens,sens_best)
-        if p_value < 0.05:
-            best_models[m] = [stat[0],sens,model]
-            break
-    return best_models
-best_models = []
-
 for i in weight_init:
     for j in regl1:
         for k in regl2:
@@ -215,8 +205,10 @@ for i in weight_init:
                                 sgd = SGD(lr=o, decay=1e-6, momentum=0.9, nesterov=True)
                                 stat, model = cv_calc(n_dataset, regl1 = j, regl2 = k , weight_init = i, dropout = l, optimize = sgd, bsize = m)
                                 
-                                
                                 json_string = model.to_json()
+                        else:
+                            stat, model = cv_calc(n_dataset, regl1 = j, regl2 = k , weight_init = i, dropout = l, optimize = 'adadelta', bsize = m)
+                            json_string = model.to_json()
 
 
 	#Save weights
@@ -233,19 +225,26 @@ for i in weight_init:
 	open('my_model_architecture.json', 'w').write(json_string)
 	model.save_weights('my_model_weights.h5')
 	'''
-	import cPickle
-	f = open('cnn_loss_{0}.pkl'.format(number_db),'wb')
-	cPickle.dump(history.losses,f,protocol=cPickle.HIGHEST_PROTOCOL)
+	f = open('cnn_loss_{0}.pkl'.format(n_dataset),'wb')
+	cPickle.dump(cv_calc().history.losses,f,protocol=cPickle.HIGHEST_PROTOCOL)
 	f.close()
 	
-	h = open('cnn_metrics_{0}.pkl'.format(number_db),'wb')
-	p = [sensitivity, specificity, F1, mcc]
-	cPickle.dump(p ,h,protocol=cPickle.HIGHEST_PROTOCOL)
+	h = open('cnn_metrics_{0}.pkl'.format(n_dataset),'wb')
+	cPickle.dump(stat,h,protocol=cPickle.HIGHEST_PROTOCOL)
 	h.close()
 	model.reset_states()
 
-
-    #returns best model
         
-
-    
+'''
+##To compare models and return the best 5, according to sensitivity
+def compare_data(best_models,stat,model):
+    sens = stat[1][0,:]
+    for m in xrange(len(best_models)):
+        sens_best = best_models[m][1]
+        None, p_value = ttest_ind(sens,sens_best)
+        if p_value < 0.05:
+            best_models[m] = [stat[0],sens,model]
+            break
+    return best_models
+best_models = []
+'''
