@@ -1,4 +1,3 @@
-
 """
 code to build dataset for ConvNet training on Tuberculosis MODS images.
 Training dataset will have transformations, labels.
@@ -92,8 +91,9 @@ class dataset:
          size = int(len(y)/float(ndataset))
          while counter < ndataset:
              z = random.sample(y, size)
-             lmda = 0.035
-             ratio = float(sum([x[i] for i in z]))/(float(len(z)))
+             lmda = 0.005
+             ratio = float(sum([x[i] for i in z]))/(len([x[i] for i in z if x[i]==0]))
+             print(ratio)
              dif = math.fabs(ratio-0.621883)
              if dif < lmda:
                  print('BINGO!', counter, dif)
