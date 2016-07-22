@@ -2,7 +2,7 @@
 """
 Created on Fri Jul 15 16:29:31 2016
 
-@author: musk
+@author: SLG
 """
 
 
@@ -166,7 +166,7 @@ class dataset:
                  gc.collect()
                  print(j)
                  
-             f = h5py.File('MODS_dataset_cv_aug_{0}.h5'.format(i),'w')
+             f = h5py.File('MODS_dataset_cv_aug_h5_{0}.h5'.format(i),'w')
              dataset_new = [training, data[1]]
              f.create_dataset('dataset_{0}'.format(i), data=dataset_new)
              f.close()

@@ -75,7 +75,8 @@ class dataset:
          function to build datasets. ndataset: number of datasets wanted; 
          name: pkl file where the data from DSetGlobal is stored. Code makes sure
          that there is the same ratio of positive/negative images in each dataset.
-         This is done, setting a lmda.
+         This is done, setting a lmda. If you set a really low lmda, you might have
+         to stop the program and rerun it a few times.
          Returns a pkl with a segmented dataset. seg_data is a list of n lists, where n
          is the number of datasets desired. These n lists consist of 2 lists: the data
          and its corresponding labels.
