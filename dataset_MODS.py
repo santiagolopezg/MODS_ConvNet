@@ -14,8 +14,8 @@ import cPickle
 import random
 import math
 import datetime
-from skimage import transform as tf
-import gc
+#from skimage import transform as tf
+#import gc
 
 
 class dataset:
@@ -34,11 +34,14 @@ class dataset:
 
 
 	def DSetGlobal(self, directory = '/home/musk/tb-CNN/data/shuffled'):
-	## Find files in folders
-         
-         foldername = next(os.walk(directory))[1]
-         for dirname in foldername: 
-         ##dirname: positive and negative
+          '''
+          Function to build a rough dataset of images with labels.
+          Returns a pkl file with data and data_labels.
+          '''
+          ## Find files in folders
+          foldername = next(os.walk(directory))[1]
+          for dirname in foldername: 
+          ##dirname: positive and negative
              f2 = os.path.join(directory,dirname)
              onlyfiles = [ f3 for f3 in os.listdir(f2) if os.path.isfile(os.path.join(f2,f3))]		
              suffix = dirname
@@ -47,26 +50,37 @@ class dataset:
              else:
 			label = 0
              for filename in onlyfiles:
-                 try:
+                 try: ##reads the image, converts to greyscale, resizes it, appends it to data and adds label too
                      current_image = scipy.misc.imread(os.path.join(f2,filename), mode='L')
                      current_image = scipy.misc.imresize(current_image,(256, 192),interp='cubic')
                      self.data.append(numpy.hstack(current_image))
                      self.data_label.append(label)
-                 except IOError:
+                 except IOError: ##If the image can't be read, or is corrupted
                      print(filename)
                  #scipy.misc.imshow(current_image) ##shows the image being read 
            
-         combined = zip(self.data, self.data_label)
-         random.shuffle(combined)
-         self.data[:], self.data_label[:] = zip(*combined)
-         print len(self.data)
-         dataset = [self.data, self.data_label]
-         f = file('MODS_data.pkl','wb')
-         cPickle.dump(dataset, f, protocol=cPickle.HIGHEST_PROTOCOL)
-         f.close()
-         print(datetime.datetime.now() - self.start_time)
+          ## shuffles de images with their label
+          combined = zip(self.data, self.data_label)
+          random.shuffle(combined)
+          self.data[:], self.data_label[:] = zip(*combined)
+          
+          print len(self.data)
+          dataset = [self.data, self.data_label]
+          f = file('MODS_data.pkl','wb') ##save images in a pkl
+          cPickle.dump(dataset, f, protocol=cPickle.HIGHEST_PROTOCOL)
+          f.close()
+          print(datetime.datetime.now() - self.start_time)
 
-	def Dset(self, ndataset, name='MODS_data.pkl'):
+	def Dset(self, ndataset=5, name='MODS_data.pkl'):
+         '''
+         function to build datasets. ndataset: number of datasets wanted; 
+         name: pkl file where the data from DSetGlobal is stored. Code makes sure
+         that there is the same ratio of positive/negative images in each dataset.
+         This is done, setting a lmda.
+         Returns a pkl with a segmented dataset. seg_data is a list of n lists, where n
+         is the number of datasets desired. These n lists consist of 2 lists: the data
+         and its corresponding labels.
+         '''
          f = file(name, 'rb')
          datapapa = cPickle.load(f)
          f.close()    
@@ -75,11 +89,11 @@ class dataset:
          y = range(len(x))
          seg_data = []
          counter = 0
-         size = int(len(y)/5.0)
+         size = int(len(y)/float(ndataset))
          while counter < ndataset:
              z = random.sample(y, size)
              lmda = 0.035
-             ratio = float(sum(z))/(float(len(z)*10000))
+             ratio = float(sum([x[i] for i in z]))/(float(len(z)))
              dif = math.fabs(ratio-0.621883)
              if dif < lmda:
                  print('BINGO!', counter, dif)
@@ -97,6 +111,15 @@ class dataset:
          f.close()
          
 	def Djoin(self, name='seg_MODS_data_2.pkl'):
+         '''
+         Takes as input segmented data from the Dset function. The data is split into
+         training and validation. Each list (dataset) in the segmented data is taken,
+         once, as the validation set. Then, the rest of the data is shuffled, and put
+         into the training set. Therefore, for each dataset, we have a different validation
+         set of images, with also a different set of training images, shuffled twice.     
+         Returns n datasets (same amount as in Dset). The datasets are made of two lists:
+         training and validation. These lists are made of two lists each: data and labels.
+         '''
          f = file(name, 'rb')
          datamama = cPickle.load(f)
          f.close()
@@ -120,11 +143,7 @@ class dataset:
              cPickle.dump(dataset_new, f, protocol=cPickle.HIGHEST_PROTOCOL)
              f.close()
 
-
-
-
-'''
-             
+'''       
 	def aug(self, current_image, label, deg):
          gc.enable
          data = []
