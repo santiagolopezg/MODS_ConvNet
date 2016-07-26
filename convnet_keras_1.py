@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
 """
+Created on Thu Jul 21 23:22:04 2016
+
+@author: Santiago
+"""
+# -*- coding: utf-8 -*-
+"""
 Created on Tue Jul 19 10:18:36 2016
 
 @author: SLG
@@ -7,6 +13,7 @@ Created on Tue Jul 19 10:18:36 2016
 
 import keras
 from keras.models import Sequential
+from keras.preprocessing.image import ImageDataGenerator
 from keras.layers.core import Dense, Dropout, Activation, Flatten
 from keras.layers.convolutional import Convolution2D, MaxPooling2D
 from keras.optimizers import SGD
@@ -35,7 +42,7 @@ bsize = [32, 70, 100, 150]
 learning_rate = [0.0001, 0.0003, 0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1, 3]
 optimizer = ['adadelta', 'sgd']
 
-n_dataset = 5
+n_dataset = 3
 
 def get_data(n_dataset):    
     f = file('MODS_dataset_cv_{0}.pkl'.format(n_dataset),'rb')
@@ -48,7 +55,9 @@ def get_data(n_dataset):
     v_data = validation_data[0]
     v_label = validation_data[1]
     
-    #reshape to 256 x 192; 1: greyscale
+    #reshape all arrays from 1 x 49152 to 256 x 192; 1: greyscale
+    t_data = np.array(t_data)
+    v_data = np.array(v_data)
     t_data = t_data.reshape(t_data.shape[0], 1, 256, 192)
     v_data = v_data.reshape(v_data.shape[0], 1, 256, 192)
     
@@ -102,7 +111,7 @@ def network(regl1, regl2, weight_init, dropout, optimize):
     model.add(Dense(output_dim=1))
     model.add(Activation('sigmoid'))    
 
-    model.compile(loss='binary_crossentropy',class_mode='binary', optimizer=optimize)
+    model.compile(optimizer=optimize, loss='binary_crossentropy', metrics=['accuracy'])
     
     return model
 
@@ -123,13 +132,15 @@ def cv_calc(n_dataset, regl1, regl2, weight_init, dropout, optimize, bsize):
     for i in xrange(n_dataset):
         X_train, Y_train, X_val, Y_val = get_data(i)
         model = network(regl1, regl2, weight_init, dropout, optimize)
-        train_datagen = keras.preprocessing.image.ImageDataGenerator(
+        
+        train_datagen = ImageDataGenerator(
             rotation_range=20,
             horizontal_flip=True,
             vertical_flip=True,
             )
+            
         model.fit_generator(train_datagen.flow(X_train, Y_train, batch_size=bsize),
-                    samples_per_epoch=len(X_train), nb_epoch=40, callbacks = [early_stopping, history]) 
+                    samples_per_epoch=len(X_train), nb_epoch=3, callbacks = [early_stopping, history]) 
                     
         
         prediction = model.predict(X_val,batch_size=Y_val.shape[0])
@@ -202,37 +213,49 @@ for i in weight_init:
                     for n in optimizer:
                         if optimizer=='sgd':
                             for o in learning_rate:
+                                print ('potato sgd')
                                 sgd = SGD(lr=o, decay=1e-6, momentum=0.9, nesterov=True)
                                 stat, model = cv_calc(n_dataset, regl1 = j, regl2 = k , weight_init = i, dropout = l, optimize = sgd, bsize = m)
-                                
+                                print ('potato foo')
                                 json_string = model.to_json()
-                        else:
-                            stat, model = cv_calc(n_dataset, regl1 = j, regl2 = k , weight_init = i, dropout = l, optimize = 'adadelta', bsize = m)
-                            json_string = model.to_json()
-
-
-	#Save weights
-	name = 'MODS_keras_{0}_weights_cnn_{0}.h5'.format(n_dataset)
-	model.save_weights(name,overwrite=True)
-
-	#l = h5py.File("loss_history_{0}.hdf5".format(number_db), "w")
-	#dset = f.create_dataset("loss_history_{0}".format(number_db), (100,), dtype='i')
-
-
-	#A way to open a model with weights in the same arquitecture
-	'''
-	json_string = model.to_json()
-	open('my_model_architecture.json', 'w').write(json_string)
-	model.save_weights('my_model_weights.h5')
-	'''
-	f = open('cnn_loss_{0}.pkl'.format(n_dataset),'wb')
-	cPickle.dump(cv_calc().history.losses,f,protocol=cPickle.HIGHEST_PROTOCOL)
-	f.close()
+                                #Save weights
+                                name = 'MODS_keras_{0}_weights_cnn_{0}.h5'.format(n_dataset)
+                                model.save_weights(name,overwrite=True)
+                                print('weights saved')
+                                
+                                f = open('cnn_loss_{0}.pkl'.format(n_dataset),'wb')
+                                cPickle.dump(cv_calc().history.losses,f,protocol=cPickle.HIGHEST_PROTOCOL)
+                                f.close()
+                                print('loss saved')
 	
-	h = open('cnn_metrics_{0}.pkl'.format(n_dataset),'wb')
-	cPickle.dump(stat,h,protocol=cPickle.HIGHEST_PROTOCOL)
-	h.close()
-	model.reset_states()
+                                h = open('cnn_model_metrics_{0}_{1}_{2}_{3}_{4}_{5}_{6}_{7}.pkl'.format(n_dataset, regl1, regl2, weight_init, dropout, optimizer, bsize),'wb')
+                                cPickle.dump(stat, model, h,protocol=cPickle.HIGHEST_PROTOCOL)
+                                h.close()
+                                print('model and metrics saved')
+                                
+                                model.reset_states()
+                        else:
+                            print ('potato adadelta')
+                            stat, model = cv_calc(n_dataset, regl1 = j, regl2 = k , weight_init = i, dropout = l, optimize = 'adadelta', bsize = m)
+                            print ('potato foo')                            
+                            json_string = model.to_json()
+                            #Save weights
+                            name = 'MODS_keras_{0}_weights_cnn_{0}.h5'.format(n_dataset)
+                            model.save_weights(name,overwrite=True)
+                            print('weights saved')
+                            
+                            f = open('cnn_loss_{0}.pkl'.format(n_dataset),'wb')
+                            cPickle.dump(cv_calc().history.losses,f,protocol=cPickle.HIGHEST_PROTOCOL)
+                            f.close()
+                            print('loss saved')
+
+	
+                            h = open('cnn_model_metrics_{0}_{1}_{2}_{3}_{4}_{5}_{6}_{7}.pkl'.format(n_dataset, regl1, regl2, weight_init, dropout, optimizer, bsize),'wb')
+                            cPickle.dump(stat, model, h,protocol=cPickle.HIGHEST_PROTOCOL)
+                            h.close()
+                            print('model and metrics saved')
+
+                            model.reset_states()
 
         
 '''
@@ -247,4 +270,15 @@ def compare_data(best_models,stat,model):
             break
     return best_models
 best_models = []
+
+
+	#l = h5py.File("loss_history_{0}.hdf5".format(number_db), "w")
+	#dset = f.create_dataset("loss_history_{0}".format(number_db), (100,), dtype='i')
+
+
+	#A way to open a model with weights in the same arquitecture
+	json_string = model.to_json()
+	open('my_model_architecture.json', 'w').write(json_string)
+	model.save_weights('my_model_weights.h5')
 '''
+
