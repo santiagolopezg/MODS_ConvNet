@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
 """
+Created on Tue Aug  2 15:14:26 2016
+
+@author: musk
+"""
+# -*- coding: utf-8 -*-
+"""
 Created on Thu Jul 21 23:22:04 2016
 
 @author: Santiago
@@ -41,6 +47,15 @@ dropout = [0.5] #[0.0, 0.25, 0.5, 0.7]
 bsize = [3] #[32, 70, 100, 150]
 learning_rate = [0.003] #[0.0001, 0.0003, 0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1, 3]
 optimizer = ['adadelta', 'sgd']
+
+#img_width, img_height = 2048, 1536
+img_width, img_height = 256, 192
+
+train_data_dir = '/home/musk/MODS_data/flow_from_dir/train'
+validation_data_dir = '/home/musk/MODS_data/flow_from_dir/validation'
+
+nb_train_samples = 12
+nb_validation_samples = 6
 
 n_dataset = 3
 
@@ -132,19 +147,44 @@ def cv_calc(n_dataset, regl1, regl2, weight_init, dropout, optimize, bsize):
     for i in xrange(n_dataset):
         X_train, Y_train, X_val, Y_val = get_data(i)
         model = network(regl1, regl2, weight_init, dropout, optimize)
-        
-        train_datagen = ImageDataGenerator(rotation_range=20,horizontal_flip=True,vertical_flip=True)
-
-        #train_datagen.fit(X_train)
-        
-        train_generator = train_datagen.flow(X=X_train, y=Y_train, batch_size=bsize, shuffle=True, save_to_dir='/home/musk/MODS_data')
+        print ('hoooaaaaa')
+       
+        train_datagen = ImageDataGenerator(
+                    rotation_range=20,
+                    horizontal_flip=True, 
+                    vertical_flip=True)
+                    
+        print ('hoooaaaaa')
+                    
+        test_datagen = ImageDataGenerator()
+       
         print ('hoooaaaaa')
         
-        model.fit_generator(train_generator, samples_per_epoch=len(X_train), nb_epoch=3, callbacks = [early_stopping, history]) 
+       
+        train_generator = train_datagen.flow_from_directory(
+                    train_data_dir,
+                    target_size=(img_width, img_height),
+                    batch_size=bsize,
+                    class_mode='binary')
 
-        #model.fit_generator(train_datagen.flow(X_train, Y_train, batch_size=bsize),
-        #            samples_per_epoch=len(X_train), nb_epoch=3, callbacks = [early_stopping, history]) 
-                    
+        print ('hoooaaaaa')
+
+        validation_generator = test_datagen.flow_from_directory(
+                    validation_data_dir,
+                    target_size=(img_width, img_height),
+                    batch_size=bsize,
+                    class_mode='binary')
+        print ('hoooaaaaa')
+
+        model.fit_generator(
+                    train_generator,
+                    samples_per_epoch=nb_train_samples,
+                    nb_epoch=3,
+                    validation_data=validation_generator,
+                    nb_val_samples=nb_validation_samples,
+                    callbacks = [early_stopping, history]) 
+
+        print ('hoooaaaaa')
         
         prediction = model.predict(X_val,batch_size=Y_val.shape[0])
 

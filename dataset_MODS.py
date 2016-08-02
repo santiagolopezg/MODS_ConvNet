@@ -32,7 +32,7 @@ class dataset:
 		self.ndataset = 5
 
 
-	def DSetGlobal(self, directory = '/home/musk/tb-CNN/data/shuffled'):
+	def DSetGlobal(self, directory = '/home/musk/MODS_data/data/shuffled'):
           '''
           Function to build a rough dataset of images with labels.
           Returns a pkl file with data and data_labels.
@@ -65,12 +65,12 @@ class dataset:
           
           print len(self.data)
           dataset = [self.data, self.data_label]
-          f = file('MODS_data.pkl','wb') ##save images in a pkl
+          f = file('debug_MODS_data.pkl','wb') ##save images in a pkl
           cPickle.dump(dataset, f, protocol=cPickle.HIGHEST_PROTOCOL)
           f.close()
           print(datetime.datetime.now() - self.start_time)
 
-	def Dset(self, ndataset=5, name='MODS_data.pkl'):
+	def Dset(self, ndataset=3, name='debug_MODS_data.pkl'):
          '''
          function to build datasets. ndataset: number of datasets wanted; 
          name: pkl file where the data from DSetGlobal is stored. Code makes sure
@@ -95,7 +95,7 @@ class dataset:
              lmda = 0.005
              ratio = float(sum([x[i] for i in z]))/(len([x[i] for i in z if x[i]==0]))
              print(ratio)
-             dif = math.fabs(ratio-0.621883)
+             dif = math.fabs(ratio-0.6218)
              if dif < lmda:
                  print('BINGO!', counter, dif)
                  y = [i for i in y if i not in z]
@@ -107,11 +107,11 @@ class dataset:
                  #print('Does not have a acceptable ratio', ratio, dif)
                  #fun+= 1
                  pass 
-         f = file('seg_MODS_data_2.pkl', 'wb')
+         f = file('seg_MODS_data.pkl', 'wb')
          cPickle.dump(seg_data, f, protocol=cPickle.HIGHEST_PROTOCOL)
          f.close()
          
-	def Djoin(self, name='seg_MODS_data_2.pkl'):
+	def Djoin(self, name='seg_MODS_data.pkl'):
          '''
          Takes as input segmented data from the Dset function. The data is split into
          training and validation. Each list (dataset) in the segmented data is taken,
