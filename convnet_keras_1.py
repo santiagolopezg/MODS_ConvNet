@@ -38,7 +38,7 @@ weight_init = ['he_normal','glorot_normal']
 regl1 = [1.0] #[1.0, 0.1, 0.01, 0.001, 0.0]
 regl2 = [1.0] #[1.0, 0.1, 0.01, 0.001, 0.0]
 dropout = [0.5] #[0.0, 0.25, 0.5, 0.7]
-bsize = [3] #[32, 70, 100, 150]
+bsize = [12] #[32, 70, 100, 150]
 learning_rate = [0.003] #[0.0001, 0.0003, 0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1, 3]
 optimizer = ['adadelta', 'sgd']
 
@@ -55,9 +55,10 @@ def get_data(n_dataset):
     v_data = validation_data[0]
     v_label = validation_data[1]
     
-    #reshape all arrays from 1 x 49152 to 256 x 192; 1: greyscale
     t_data = np.array(t_data)
+    t_label = np.array(t_label)
     v_data = np.array(v_data)
+    v_label = np.array(v_label)
     t_data = t_data.reshape(t_data.shape[0], 1, 256, 192)
     v_data = v_data.reshape(v_data.shape[0], 1, 256, 192)
     
@@ -133,11 +134,16 @@ def cv_calc(n_dataset, regl1, regl2, weight_init, dropout, optimize, bsize):
         X_train, Y_train, X_val, Y_val = get_data(i)
         model = network(regl1, regl2, weight_init, dropout, optimize)
         
-        train_datagen = ImageDataGenerator(rotation_range=20,horizontal_flip=True,vertical_flip=True)
+        train_datagen = ImageDataGenerator(
+                rotation_range=45,
+                horizontal_flip=True,
+                vertical_flip=True)
+                #width_shift_range=0.5, 
+                #height_shift_range=0.5)
 
-        #train_datagen.fit(X_train)
+        train_datagen.fit(X_train)
         
-        train_generator = train_datagen.flow(X=X_train, y=Y_train, batch_size=bsize, shuffle=True, save_to_dir='/home/musk/MODS_data')
+        train_generator = train_datagen.flow(X=X_train, y=Y_train, batch_size=12, shuffle=True, save_to_dir='/home/musk/MODS_data')
         print ('hoooaaaaa')
         
         model.fit_generator(train_generator, samples_per_epoch=len(X_train), nb_epoch=3, callbacks = [early_stopping, history]) 
@@ -196,6 +202,8 @@ def cv_calc(n_dataset, regl1, regl2, weight_init, dropout, optimize, bsize):
             print('Divide by Zero')
             F1 = None
             mcc = None
+            PPV = None
+            NPV = None
             
         
         param_metrics.append([sensitivity, specificity, F1, PPV, NPV, mcc])
@@ -221,12 +229,13 @@ for i in weight_init:
                                 stat, model = cv_calc(n_dataset, regl1 = j, regl2 = k , weight_init = i, dropout = l, optimize = sgd, bsize = m)
                                 print ('potato foo')
                                 json_string = model.to_json()
+                                
                                 #Save weights
-                                name = 'MODS_keras_{0}_weights_cnn_{0}.h5'.format(n_dataset)
+                                name = 'MODS_keras_weights_{0}_{1}_{2}_{3}_{4}_{5}_{6}_{7}.h5'.format(n_dataset, regl1, regl2, weight_init, dropout, optimizer, bsize)
                                 model.save_weights(name,overwrite=True)
                                 print('weights saved')
                                 
-                                f = open('cnn_loss_{0}.pkl'.format(n_dataset),'wb')
+                                f = open('cnn_loss_{0}_{1}_{2}_{3}_{4}_{5}_{6}_{7}.pkl'.format(n_dataset, regl1, regl2, weight_init, dropout, optimizer, bsize),'wb')
                                 cPickle.dump(cv_calc().history.losses,f,protocol=cPickle.HIGHEST_PROTOCOL)
                                 f.close()
                                 print('loss saved')
@@ -242,12 +251,13 @@ for i in weight_init:
                             stat, model = cv_calc(n_dataset, regl1 = j, regl2 = k , weight_init = i, dropout = l, optimize = 'adadelta', bsize = m)
                             print ('potato foo')                            
                             json_string = model.to_json()
+                            
                             #Save weights
-                            name = 'MODS_keras_{0}_weights_cnn_{0}.h5'.format(n_dataset)
+                            name = 'MODS_keras_weights_{0}_{1}_{2}_{3}_{4}_{5}_{6}_{7}.h5'.format(n_dataset, regl1, regl2, weight_init, dropout, optimizer, bsize)
                             model.save_weights(name,overwrite=True)
                             print('weights saved')
                             
-                            f = open('cnn_loss_{0}.pkl'.format(n_dataset),'wb')
+                            f = open('cnn_loss_{0}_{1}_{2}_{3}_{4}_{5}_{6}_{7}.pkl'.format(n_dataset, regl1, regl2, weight_init, dropout, optimizer, bsize),'wb')
                             cPickle.dump(cv_calc().history.losses,f,protocol=cPickle.HIGHEST_PROTOCOL)
                             f.close()
                             print('loss saved')
