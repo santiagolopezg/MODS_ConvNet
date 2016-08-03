@@ -143,7 +143,12 @@ def cv_calc(n_dataset, regl1, regl2, weight_init, dropout, optimize, bsize):
 
         train_datagen.fit(X_train)
         
-        train_generator = train_datagen.flow(X=X_train, y=Y_train, batch_size=12, shuffle=True, save_to_dir='/home/musk/MODS_data')
+        train_generator = train_datagen.flow(
+                    X=X_train, 
+                    y=Y_train, 
+                    batch_size=12, 
+                    shuffle=True)
+                    #save_to_dir='/home/musk/MODS_data')
         print ('hoooaaaaa')
         
         model.fit_generator(train_generator, samples_per_epoch=len(X_train), nb_epoch=3, callbacks = [early_stopping, history]) 
