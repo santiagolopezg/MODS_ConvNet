@@ -228,7 +228,7 @@ for i in weight_init:
             for l in dropout:
                 for m in bsize:
                     for n in optimizer:
-                        if optimizer=='sgd':
+                        if n =='sgd':
                             print 'fito paez'
                             for o in learning_rate:
                                 print ('potato sgd')
