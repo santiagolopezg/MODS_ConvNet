@@ -40,7 +40,7 @@ regl2 = [1.0] #[1.0, 0.1, 0.01, 0.001, 0.0]
 dropout = [0.5] #[0.0, 0.25, 0.5, 0.7]
 bsize = [12] #[32, 70, 100, 150]
 learning_rate = [0.003] #[0.0001, 0.0003, 0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1, 3]
-optimizer = ['adadelta', 'sgd']
+optimizer = ['sgd', 'adadelta']
 
 n_dataset = 3
 
@@ -132,6 +132,7 @@ def cv_calc(n_dataset, regl1, regl2, weight_init, dropout, optimize, bsize):
     #for each dataset, loads the model, the data, and calculates metrics
     for i in xrange(n_dataset):
         X_train, Y_train, X_val, Y_val = get_data(i)
+        print 'training on dataset ' + str(i)
         model = network(regl1, regl2, weight_init, dropout, optimize)
         
         train_datagen = ImageDataGenerator(
@@ -149,7 +150,6 @@ def cv_calc(n_dataset, regl1, regl2, weight_init, dropout, optimize, bsize):
                     batch_size=12, 
                     shuffle=True)
                     #save_to_dir='/home/musk/MODS_data')
-        print ('hoooaaaaa')
         
         model.fit_generator(train_generator, samples_per_epoch=len(X_train), nb_epoch=40, callbacks = [early_stopping, history]) 
 
@@ -212,7 +212,7 @@ def cv_calc(n_dataset, regl1, regl2, weight_init, dropout, optimize, bsize):
             
         
         param_metrics.append([sensitivity, specificity, F1, PPV, NPV, mcc])
-        score = model.evaluate(X_val, Y_val, show_accuracy=True, verbose=0)
+        score = model.evaluate(X_val, Y_val, verbose=0)
         print('Test loss:', score[0])
         print('Test accuracy:', score[1])
         
@@ -228,54 +228,77 @@ for i in weight_init:
                 for m in bsize:
                     for n in optimizer:
                         if optimizer=='sgd':
+                            print 'fito paez'
                             for o in learning_rate:
                                 print ('potato sgd')
                                 sgd = SGD(lr=o, decay=1e-6, momentum=0.9, nesterov=True)
                                 stat, model, history = cv_calc(n_dataset, regl1 = j, regl2 = k , weight_init = i, dropout = l, optimize = sgd, bsize = m)
-                                print ('potato foo')
+                                
+                                '''save model in HDF5 file - it will contain architecture of the model, weights, 
+                                training configuration, and state of the optimizer - I actually can't get this to work ATM,
+                                so I'll stick to saving model and weights separately'''
+                                #save model
+                                #name = 'MODS_keras_model_{0}_{1}_{2}_{3}_{4}_{5}_{6}.h5'.format(n_dataset, j, k, i, l, sgd, m)
+                                #model.save(name)
+                                #del model
                                 json_string = model.to_json()
+                                name = 'MODS_keras_model_{0}_{1}_{2}_{3}_{4}_{5}_{6}.json'.format(n_dataset, j, k, i, l, 'sgd', m, o)
+                                open(name, 'w').write(json_string)
+                                print 'model saved'
+                                
                                 
                                 #Save weights
-                                name = 'MODS_keras_weights_{0}_{1}_{2}_{3}_{4}_{5}_{6}.h5'.format(n_dataset, j, k, i, l, sgd, m)
-                                model.save_weights(name,overwrite=True)
+                                name = 'MODS_keras_weights_{0}_{1}_{2}_{3}_{4}_{5}_{6}.h5'.format(n_dataset, j, k, i, l, 'sgd', m, o)
+                                model.save_weights(name, overwrite=True)
                                 print('weights saved')
                                 
-                                f = open('cnn_loss_{0}_{1}_{2}_{3}_{4}_{5}_{6}.pkl'.format(n_dataset, j, k, i, l, sgd, m),'wb')
+                                #save loss
+                                f = open('MODS_keras_loss_{0}_{1}_{2}_{3}_{4}_{5}_{6}.pkl'.format(n_dataset, j, k, i, l, 'sgd', m, o),'wb')
                                 cPickle.dump(history.losses,f,protocol=cPickle.HIGHEST_PROTOCOL)
                                 f.close()
                                 print('loss saved')
-	
-                                h = open('cnn_model_metrics_{0}_{1}_{2}_{3}_{4}_{5}_{6}.pkl'.format(n_dataset, j, k, i, l, sgd, m),'wb')
-                                cPickle.dump(stat, model, h,protocol=cPickle.HIGHEST_PROTOCOL)
+                                
+                                #save metrics 
+                                h = open('MODS_keras_metrics_{0}_{1}_{2}_{3}_{4}_{5}_{6}.pkl'.format(n_dataset, j, k, i, l, 'sgd', m, o),'wb')
+                                cPickle.dump(stat, h,protocol=cPickle.HIGHEST_PROTOCOL)
                                 h.close()
-                                print('model and metrics saved')
+                                print('metrics saved')
                                 
                                 model.reset_states()
                         else:
                             print ('potato adadelta')
-                            stat, model, history = cv_calc(n_dataset, regl1 = j, regl2 = k , weight_init = i, dropout = l, optimize = 'adadelta', bsize = m)
-                            print ('potato foo')                            
+                            stat, model, history = cv_calc(n_dataset, regl1 = j, regl2 = k , weight_init = i, dropout = l, optimize = 'adadelta', bsize = m)                            
+                            
+                            #save model
+                            #name = 'MODS_keras_model_{0}_{1}_{2}_{3}_{4}_{5}_{6}.h5'.format(n_dataset, j, k, i, l, 'adadelta', m)
+                            #model.save(name)
+                            #del model
                             json_string = model.to_json()
+                            name = 'MODS_keras_model_{0}_{1}_{2}_{3}_{4}_{5}_{6}.json'.format(n_dataset, j, k, i, l, 'adadelta', m)
+                            open(name, 'w').write(json_string)
+                            print 'model saved'
                             
                             #Save weights
                             name = 'MODS_keras_weights_{0}_{1}_{2}_{3}_{4}_{5}_{6}.h5'.format(n_dataset, j, k ,  i, l,'adadelta',m)
                             model.save_weights(name,overwrite=True)
                             print('weights saved')
                             
-                            f = open('cnn_loss_{0}_{1}_{2}_{3}_{4}_{5}_{6}.pkl'.format(n_dataset, j, k ,  i, l,'adadelta',m),'wb')
+                            #save loss
+                            f = open('MODS_keras_loss_{0}_{1}_{2}_{3}_{4}_{5}_{6}.pkl'.format(n_dataset, j, k ,  i, l,'adadelta',m),'wb')
                             cPickle.dump(history.losses,f,protocol=cPickle.HIGHEST_PROTOCOL)
                             f.close()
                             print('loss saved')
 
-	
-                            h = open('cnn_model_metrics_{0}_{1}_{2}_{3}_{4}_{5}_{6}.pkl'.format(n_dataset, j, k ,  i, l,'adadelta',m),'wb')
-                            cPickle.dump(stat, model, h,protocol=cPickle.HIGHEST_PROTOCOL)
+                            #save metrics
+                            h = open('MODS_keras_metrics_{0}_{1}_{2}_{3}_{4}_{5}_{6}.pkl'.format(n_dataset, j, k ,  i, l,'adadelta',m),'wb')
+                            cPickle.dump(stat, h, protocol=cPickle.HIGHEST_PROTOCOL)
                             h.close()
-                            print('model and metrics saved')
+                            print('metrics saved')
 
                             model.reset_states()
 
-        
+print 'finished hyperparameter search!'
+ 
 '''
 ##To compare models and return the best 5, according to sensitivity
 def compare_data(best_models,stat,model):
@@ -293,10 +316,10 @@ best_models = []
 	#l = h5py.File("loss_history_{0}.hdf5".format(number_db), "w")
 	#dset = f.create_dataset("loss_history_{0}".format(number_db), (100,), dtype='i')
 
+NB: 	#A way to open a model with weights in the same arquitecture
+json_string = model.to_json()
+open('my_model_architecture.json', 'w').write(json_string)
+model.save_weights('my_model_weights.h5')  
 
-	#A way to open a model with weights in the same arquitecture
-	json_string = model.to_json()
-	open('my_model_architecture.json', 'w').write(json_string)
-	model.save_weights('my_model_weights.h5')
 '''
 
