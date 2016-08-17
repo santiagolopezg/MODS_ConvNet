@@ -144,7 +144,7 @@ def cv_calc(regl1, regl2, weight_init, dropout, optimize, bsize, n_dataset):
     train_generator = train_datagen.flow(
                 X=X_train, 
                 y=Y_train, 
-                batch_size=32, 
+                batch_size=bsize, 
                 shuffle=True)
                 #save_to_dir='/home/musk/MODS_data')
     
@@ -223,7 +223,7 @@ weight_init = ['he_normal','glorot_normal']
 regl1 = [1.0, 0.1, 0.01, 0.001, 0.0]
 regl2 = [1.0, 0.1, 0.01, 0.001, 0.0]
 dropout = [0.0, 0.25, 0.5, 0.7]
-bsize = [32, 70, 100, 150]
+bsize = [16] #[32, 70, 100, 150]
 learning_rate = [0.0001, 0.0003, 0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1, 3]
 optimizer = ['sgd', 'adadelta']
 
