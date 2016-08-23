@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
 """
+Created on Tue Aug 23 12:17:36 2016
+
+@author: musk
+"""
+
+# -*- coding: utf-8 -*-
+"""
 Created on Thu Aug  4 15:36:27 2016
 
 @author: musk
@@ -69,13 +76,13 @@ def network(regl1, regl2, weight_init, dropout, optimize):
     #create network architecture
     model = Sequential()
     
-    model.add(Convolution2D(16, 5, 5,input_shape=(1, 256, 192),W_regularizer=l1l2(l1=regl1, l2=regl2),init=weight_init))
+    model.add(Convolution2D(16, 7, 7,input_shape=(1, 256, 192),W_regularizer=l1l2(l1=regl1, l2=regl2),init=weight_init))
     model.add(BatchNormalization())
     model.add(Activation('relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(Dropout(dropout))
     
-    model.add(Convolution2D(32, 3, 3, W_regularizer=l1l2(l1=regl1, l2=regl2),init=weight_init))
+    model.add(Convolution2D(32, 6, 6, W_regularizer=l1l2(l1=regl1, l2=regl2),init=weight_init))
     model.add(BatchNormalization())
     model.add(Activation('relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))  
@@ -87,13 +94,7 @@ def network(regl1, regl2, weight_init, dropout, optimize):
     model.add(MaxPooling2D(pool_size=(2, 2)))  
     model.add(Dropout(dropout))
     
-    model.add(Convolution2D(64, 3, 3, W_regularizer=l1l2(l1=regl1, l2=regl2),init=weight_init))
-    model.add(BatchNormalization())
-    model.add(Activation('relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))  
-    model.add(Dropout(dropout))
-    
-    model.add(Convolution2D(64, 3, 3, W_regularizer=l1l2(l1=regl1, l2=regl2),init=weight_init))
+    model.add(Convolution2D(64, 2, 2, W_regularizer=l1l2(l1=regl1, l2=regl2),init=weight_init))
     model.add(BatchNormalization())
     model.add(Activation('relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))  
