@@ -1,24 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Aug 23 12:17:36 2016
-
-@author: musk
-"""
-
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Aug  4 15:36:27 2016
-
-@author: musk
-"""
-
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Jul 21 23:22:04 2016
-
-@author: Santiago
-"""
-# -*- coding: utf-8 -*-
 """
 Created on Tue Jul 19 10:18:36 2016
 
@@ -223,7 +202,7 @@ weight_init = ['he_normal','glorot_normal']
 regl1 = [1.0, 0.1, 0.01, 0.001, 0.0]
 regl2 = [1.0, 0.1, 0.01, 0.001, 0.0]
 dropout = [0.0, 0.25, 0.5, 0.7]
-bsize = [16] #[32, 70, 100, 150]
+bsize = [32] #[32, 70, 100, 150]
 learning_rate = [0.0001, 0.0003, 0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1, 3]
 optimizer = ['sgd', 'adadelta']
 
