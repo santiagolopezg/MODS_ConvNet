@@ -15,6 +15,7 @@ GPU run command:
 '''
 
 from __future__ import print_function
+import keras
 from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Flatten
@@ -49,16 +50,33 @@ def get_data(n_dataset):
     
     return (t_data, t_label), (v_data, v_label)
 
-batch_size = 32
+class LossHistory(keras.callbacks.Callback):
+    def on_train_begin(self, logs={}):
+        self.losses = []
+
+    def on_batch_end(self, batch, logs={}):
+        self.losses.append(logs.get('loss'))
+        
 nb_classes = 2
 nb_epoch = 10
 data_augmentation = True
 n_dataset = 5
 
+#Hyperparameters for tuning
+#weight_init = ['he_normal','glorot_normal']
+#regl1 = [1.0, 0.1, 0.01, 0.001, 0.0]
+#regl2 = [1.0, 0.1, 0.01, 0.001, 0.0]
+dropout = 0.5 #[0.0, 0.25, 0.5, 0.7]
+batch_size = 32 #[32, 70, 100, 150]
+learning_rate = 0.003 #[0.0001, 0.0003, 0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1, 3]
+#optimizer = ['sgd', 'adadelta']
+
 # input image dimensions
 img_rows, img_cols = 256, 192
 # my images are images are greyscale
 img_channels = 1
+
+
 #have to check this
 model = Sequential()
 
@@ -68,19 +86,19 @@ model.add(Activation('relu'))
 model.add(Convolution2D(32, 3, 3))
 model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.25))
+model.add(Dropout(dropout))
 
 model.add(Convolution2D(64, 3, 3, border_mode='same'))
 model.add(Activation('relu'))
 model.add(Convolution2D(64, 3, 3))
 model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.25))
+model.add(Dropout(dropout))
 
 model.add(Flatten())
 model.add(Dense(512))
 model.add(Activation('relu'))
-model.add(Dropout(0.5))
+model.add(Dropout(dropout))
 model.add(Dense(nb_classes))
 model.add(Activation('softmax'))
 
@@ -96,13 +114,14 @@ for i in xrange(n_dataset):
     Y_test = np_utils.to_categorical(y_test, nb_classes)
 
     # let's train the model using SGD + momentum (how original).
-    sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
-    model.compile(loss='categorical_crossentropy',
+    sgd = SGD(lr=learning_rate, decay=1e-6, momentum=0.9, nesterov=True)
+    model.compile(loss='binary_crossentropy',
+                  class_mode = 'binary',
                   optimizer=sgd,
                   metrics=['accuracy'])
-    
-    X_train = X_train.astype('float32')
-    X_test = X_test.astype('float32')
+                  
+    history = LossHistory()
+
     X_train /= 255
     X_test /= 255
     
@@ -139,3 +158,22 @@ for i in xrange(n_dataset):
                             samples_per_epoch=X_train.shape[0],
                             nb_epoch=nb_epoch,
                             validation_data=(X_test, Y_test))
+                            
+                            
+    score = model.evaluate(X_test, y_test, show_accuracy=True, verbose=0)
+    print('Test loss:', score[0])
+    print('Test accuracy:', score[1])
+
+model.reset_states()
+
+#import matplotlib.pylab as plt
+#plt.plot(history.losses,'bo')
+#plt.xlabel('Iteration')
+#plt.ylabel('loss')
+#plt.show()
+    
+    
+    
+    
+    
+
