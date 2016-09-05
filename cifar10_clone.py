@@ -116,7 +116,6 @@ for i in xrange(n_dataset):
     # let's train the model using SGD + momentum (how original).
     sgd = SGD(lr=learning_rate, decay=1e-6, momentum=0.9, nesterov=True)
     model.compile(loss='binary_crossentropy',
-                  class_mode = 'binary',
                   optimizer=sgd,
                   metrics=['accuracy'])
                   
