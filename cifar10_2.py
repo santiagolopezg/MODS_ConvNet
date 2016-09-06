@@ -13,7 +13,7 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Flatten
 from keras.layers import Convolution2D, MaxPooling2D
-from keras.optimizers import SGD
+from keras.optimizers import SGD, adadelta
 from keras.layers.normalization import BatchNormalization
 from keras.utils import np_utils
 import cPickle
@@ -71,15 +71,8 @@ img_rows, img_cols = 256, 192
 img_channels = 1
 
 
-#have to check this
 model = Sequential()
 
-
-
-
-
-
-#mein 1
 model.add(Convolution2D(16, 7, 7,border_mode='same',
                         input_shape=(img_channels, img_rows, img_cols), init=weight_init))
 model.add(BatchNormalization())
@@ -87,14 +80,11 @@ model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 model.add(Dropout(dropout))
 
-#mein 2
 model.add(Convolution2D(32, 6, 6,border_mode='same',init=weight_init))
 model.add(BatchNormalization())
 model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))  
 model.add(Dropout(dropout))
-
-#mein others
 
 model.add(Convolution2D(64, 3, 3,border_mode='same', init=weight_init))
 model.add(BatchNormalization())
@@ -128,11 +118,16 @@ for i in xrange(n_dataset):
     Y_train = np_utils.to_categorical(y_train, nb_classes)
     Y_test = np_utils.to_categorical(y_test, nb_classes)
 
+    #optimize with adadelta
+    model.compile(loss='binary_crossentropy', 
+                 optimizer='adadelta',
+                 metrics=['accuracy'])
+
     # let's train the model using SGD + momentum (how original).
-    sgd = SGD(lr=learning_rate, decay=1e-6, momentum=0.9, nesterov=True)
-    model.compile(loss='binary_crossentropy',
-                  optimizer=sgd,
-                  metrics=['accuracy'])
+    #sgd = SGD(lr=learning_rate, decay=1e-6, momentum=0.9, nesterov=True)
+    #model.compile(loss='binary_crossentropy',
+    #              optimizer=sgd,
+    #              metrics=['accuracy'])
                   
     history = LossHistory()
 
@@ -157,8 +152,8 @@ for i in xrange(n_dataset):
             samplewise_std_normalization=False,  # divide each input by its std
             zca_whitening=False,  # apply ZCA whitening
             rotation_range=180,  # randomly rotate images in the range (degrees, 0 to 180)
-            width_shift_range=0.1,  # randomly shift images horizontally (fraction of total width)
-            height_shift_range=0.1,  # randomly shift images vertically (fraction of total height)
+            #width_shift_range=0.1,  # randomly shift images horizontally (fraction of total width)
+            #height_shift_range=0.1,  # randomly shift images vertically (fraction of total height)
             horizontal_flip=True,  # randomly flip images
             vertical_flip=True)  # randomly flip images
     
