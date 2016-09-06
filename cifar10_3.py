@@ -111,7 +111,7 @@ model.add(Dense(50,W_regularizer=l1l2(l1=regl1, l2=regl2),init=weight_init))
 model.add(Activation('relu'))
 model.add(Dropout(0.5))
 
-model.add(Dense(5,W_regularizer=l2(l2=0.001),init='he_normal'))
+model.add(Dense(5,W_regularizer=l1l2(l1 = regl1, l2=regl2),init='he_normal'))
 model.add(Activation('relu'))
 model.add(Dropout(0.5))
 
