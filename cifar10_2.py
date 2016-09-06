@@ -105,7 +105,8 @@ model.add(Dropout(dropout))
 
 model.add(Dropout(dropout))
 model.add(Dense(nb_classes))
-model.add(Activation('softmax'))
+#model.add(Activation('softmax'))
+model.add(Activation('sigmoid'))
 
 for i in xrange(n_dataset):
     # the data, shuffled and split between train and test sets
