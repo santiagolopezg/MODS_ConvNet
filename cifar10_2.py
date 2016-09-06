@@ -173,7 +173,7 @@ for i in xrange(n_dataset):
                             validation_data=(X_test, Y_test))
                             
                             
-    score = model.evaluate(X_test, y_test, show_accuracy=True, verbose=0)
+    score = model.evaluate(X_test, Y_test, show_accuracy=True, verbose=0)
     print('Test loss:', score[0])
     print('Test accuracy:', score[1])
 
