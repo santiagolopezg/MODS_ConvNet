@@ -5,15 +5,6 @@ Created on Tue Sep  6 12:41:00 2016
 @author: musk
 """
 
-# -*- coding: utf-8 -*-
-'''
-Created on Mon Sep  5 13:50:34 2016
-
-cifar clone with bigger net
-"""
-
-'''
-
 from __future__ import print_function
 import keras
 from keras.preprocessing.image import ImageDataGenerator
