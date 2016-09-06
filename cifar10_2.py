@@ -1,16 +1,9 @@
 # -*- coding: utf-8 -*-
 '''
-Created on Mon Sep  5 12:29:30 2016
+Created on Mon Sep  5 13:50:34 2016
 
-@author: musk
-
-CIFAR10 clone (from keras/examples)
-
-Train a simple deep CNN on the CIFAR10 small images dataset.
-
-GPU run command:
-    THEANO_FLAGS=mode=FAST_RUN,device=gpu,floatX=float32 python cifar10_cnn.py
-
+cifar clone with bigger net
+"""
 
 '''
 
@@ -63,7 +56,7 @@ data_augmentation = True
 n_dataset = 5
 
 #Hyperparameters for tuning
-#weight_init = ['he_normal','glorot_normal']
+weight_init = 'he_normal' #['glorot_normal']
 #regl1 = [1.0, 0.1, 0.01, 0.001, 0.0]
 #regl2 = [1.0, 0.1, 0.01, 0.001, 0.0]
 dropout = 0.5 #[0.0, 0.25, 0.5, 0.7]
@@ -80,24 +73,45 @@ img_channels = 1
 #have to check this
 model = Sequential()
 
-model.add(Convolution2D(32, 3, 3, border_mode='same',
-                        input_shape=(img_channels, img_rows, img_cols)))
-model.add(Activation('relu'))
-model.add(Convolution2D(32, 3, 3))
+
+
+
+
+
+#mein 1
+model.add(Convolution2D(16, 7, 7,border_mode='same',
+                        input_shape=(img_channels, img_rows, img_cols), init=weight_init))
+model.add(BatchNormalization())
 model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 model.add(Dropout(dropout))
 
-model.add(Convolution2D(64, 3, 3, border_mode='same'))
+#mein 2
+model.add(Convolution2D(32, 6, 6,border_mode='same',init=weight_init))
+model.add(BatchNormalization())
 model.add(Activation('relu'))
-model.add(Convolution2D(64, 3, 3))
+model.add(MaxPooling2D(pool_size=(2, 2)))  
+model.add(Dropout(dropout))
+
+#mein others
+
+model.add(Convolution2D(64, 3, 3,border_mode='same', init=weight_init))
+model.add(BatchNormalization())
 model.add(Activation('relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(MaxPooling2D(pool_size=(2, 2)))  
+model.add(Dropout(dropout))
+
+model.add(Convolution2D(64, 2, 2,border_mode='same',init=weight_init))
+model.add(BatchNormalization())
+model.add(Activation('relu'))
+model.add(MaxPooling2D(pool_size=(2, 2)))  
 model.add(Dropout(dropout))
 
 model.add(Flatten())
-model.add(Dense(512))
+model.add(Dense(200,init=weight_init))
 model.add(Activation('relu'))
+model.add(Dropout(dropout))
+
 model.add(Dropout(dropout))
 model.add(Dense(nb_classes))
 model.add(Activation('softmax'))
@@ -159,7 +173,7 @@ for i in xrange(n_dataset):
                             validation_data=(X_test, Y_test))
                             
                             
-    score = model.evaluate(X_test, Y_test, show_accuracy=True, verbose=0)
+    score = model.evaluate(X_test, y_test, show_accuracy=True, verbose=0)
     print('Test loss:', score[0])
     print('Test accuracy:', score[1])
 
