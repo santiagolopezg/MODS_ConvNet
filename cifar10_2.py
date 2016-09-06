@@ -14,6 +14,7 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Flatten
 from keras.layers import Convolution2D, MaxPooling2D
 from keras.optimizers import SGD
+from keras.layers.normalization import BatchNormalization
 from keras.utils import np_utils
 import cPickle
 import numpy as np
