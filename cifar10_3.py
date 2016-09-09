@@ -51,7 +51,7 @@ class LossHistory(keras.callbacks.Callback):
         self.losses.append(logs.get('loss'))
         
 nb_classes = 2
-nb_epoch = 10
+nb_epoch = 100
 data_augmentation = True
 n_dataset = 5
 
@@ -60,7 +60,7 @@ weight_init = 'he_normal' #['glorot_normal']
 regl1 = [0.001] #[1.0, 0.1, 0.01, 0.001, 0.0]
 regl2 = [0.001] #[1.0, 0.1, 0.01, 0.001, 0.0]
 dropout = 0.5 #[0.0, 0.25, 0.5, 0.7]
-batch_size = 32 #[32, 70, 100, 150]
+batch_size = 20 #[32, 70, 100, 150]
 learning_rate = 0.003 #[0.0001, 0.0003, 0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1, 3]
 #optimizer = ['sgd', 'adadelta']
 
@@ -87,7 +87,7 @@ model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))  
 model.add(Dropout(dropout))
 
-model.add(Convolution2D(64, 3, 3, W_regularizer=l1l2(l1=regl1, l2=regl2),init=weight_init))
+model.add(Convolution2D(32, 3, 3, W_regularizer=l1l2(l1=regl1, l2=regl2),init=weight_init))
 model.add(BatchNormalization())
 model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))  
@@ -106,7 +106,7 @@ model.add(MaxPooling2D(pool_size=(2, 2)))
 model.add(Dropout(dropout))
 
 model.add(Flatten())
-model.add(Dense(50,W_regularizer=l1l2(l1=regl1, l2=regl2),init=weight_init))
+model.add(Dense(100,W_regularizer=l1l2(l1=regl1, l2=regl2),init=weight_init))
 #model.add(BatchNormalization())
 model.add(Activation('relu'))
 model.add(Dropout(0.5))
@@ -187,7 +187,7 @@ for i in xrange(n_dataset):
     print('Test loss:', score[0])
     print('Test accuracy:', score[1])
 
-model.reset_states()
+#model.reset_states()
 
 #import matplotlib.pylab as plt
 #plt.plot(history.losses,'bo')

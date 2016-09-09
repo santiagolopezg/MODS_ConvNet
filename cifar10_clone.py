@@ -66,9 +66,9 @@ n_dataset = 5
 #weight_init = ['he_normal','glorot_normal']
 #regl1 = [1.0, 0.1, 0.01, 0.001, 0.0]
 #regl2 = [1.0, 0.1, 0.01, 0.001, 0.0]
-dropout = 0.5 #[0.0, 0.25, 0.5, 0.7]
-batch_size = 32 #[32, 70, 100, 150]
-learning_rate = 0.003 #[0.0001, 0.0003, 0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1, 3]
+dropout = 0.7 #[0.0, 0.25, 0.5, 0.7]
+batch_size = 50 #[32, 70, 100, 150]
+learning_rate = 0.1 #[0.0001, 0.0003, 0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1, 3]
 #optimizer = ['sgd', 'adadelta']
 
 # input image dimensions
@@ -80,7 +80,7 @@ img_channels = 1
 #have to check this
 model = Sequential()
 
-model.add(Convolution2D(32, 5, 5, border_mode='same',
+model.add(Convolution2D(32, 4, 4, border_mode='same',
                         input_shape=(img_channels, img_rows, img_cols)))
 model.add(Activation('relu'))
 model.add(Convolution2D(32, 3, 3))
@@ -97,11 +97,11 @@ model.add(MaxPooling2D(pool_size=(2, 2)))
 model.add(Dropout(dropout))
 
 model.add(Flatten())
-model.add(Dense(512))
+model.add(Dense(10))
 model.add(Activation('relu'))
 model.add(Dropout(dropout))
 model.add(Dense(nb_classes))
-model.add(Activation('softmax'))
+model.add(Activation('sigmoid'))
 
 for i in xrange(n_dataset):
     # the data, shuffled and split between train and test sets
@@ -143,8 +143,8 @@ for i in xrange(n_dataset):
             samplewise_std_normalization=False,  # divide each input by its std
             zca_whitening=False,  # apply ZCA whitening
             rotation_range=180,  # randomly rotate images in the range (degrees, 0 to 180)
-            width_shift_range=0.1,  # randomly shift images horizontally (fraction of total width)
-            height_shift_range=0.1,  # randomly shift images vertically (fraction of total height)
+           # width_shift_range=0.1,  # randomly shift images horizontally (fraction of total width)
+           # height_shift_range=0.1,  # randomly shift images vertically (fraction of total height)
             horizontal_flip=True,  # randomly flip images
             vertical_flip=True)  # randomly flip images
     
@@ -160,11 +160,11 @@ for i in xrange(n_dataset):
                             validation_data=(X_test, Y_test))
                             
                             
-    score = model.evaluate(X_test, Y_test, verbose=0)
+    score = model.evaluate(X_test, Y_test, verbose=1)
     print('Test loss:', score[0])
     print('Test accuracy:', score[1])
 
-model.reset_states()
+#model.reset_states()
 
 #import matplotlib.pylab as plt
 #plt.plot(history.losses,'bo')

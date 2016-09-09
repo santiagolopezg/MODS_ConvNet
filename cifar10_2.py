@@ -52,7 +52,7 @@ class LossHistory(keras.callbacks.Callback):
         self.losses.append(logs.get('loss'))
         
 nb_classes = 2
-nb_epoch = 10
+nb_epoch = 100
 data_augmentation = True
 n_dataset = 5
 
@@ -61,8 +61,8 @@ weight_init = 'he_normal' #['glorot_normal']
 #regl1 = [1.0, 0.1, 0.01, 0.001, 0.0]
 #regl2 = [1.0, 0.1, 0.01, 0.001, 0.0]
 dropout = 0.5 #[0.0, 0.25, 0.5, 0.7]
-batch_size = 32 #[32, 70, 100, 150]
-learning_rate = 0.003 #[0.0001, 0.0003, 0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1, 3]
+batch_size = 70 #[32, 70, 100, 150]
+learning_rate = 0.0003 #[0.0001, 0.0003, 0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1, 3]
 #optimizer = ['sgd', 'adadelta']
 
 # input image dimensions
