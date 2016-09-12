@@ -13,7 +13,7 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Flatten
 from keras.layers import Convolution2D, MaxPooling2D
-from keras.optimizers import SGD, adadelta
+from keras.optimizers import SGD, adadelta, rmsprop
 from keras.layers.normalization import BatchNormalization
 from keras.utils import np_utils
 import cPickle
@@ -61,7 +61,7 @@ weight_init = 'he_normal' #['glorot_normal']
 #regl1 = [1.0, 0.1, 0.01, 0.001, 0.0]
 #regl2 = [1.0, 0.1, 0.01, 0.001, 0.0]
 dropout = 0.5 #[0.0, 0.25, 0.5, 0.7]
-batch_size = 70 #[32, 70, 100, 150]
+batch_size = 24 #[32, 70, 100, 150]
 learning_rate = 0.003 #[0.0001, 0.0003, 0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1, 3]
 #optimizer = ['sgd', 'adadelta']
 
@@ -73,32 +73,32 @@ img_channels = 1
 
 model = Sequential()
 
-model.add(Convolution2D(128, 3, 3,border_mode='same',
+model.add(Convolution2D(128, 3, 3,
                         input_shape=(img_channels, img_rows, img_cols), init=weight_init, name='conv1_1'))
 model.add(BatchNormalization())
 model.add(Activation('relu'))
-model.add(Convolution2D(128, 3, 3,border_mode='same',init=weight_init, name='conv1_2'))
+model.add(Convolution2D(128, 3, 3,init=weight_init, name='conv1_2'))
 model.add(BatchNormalization())
 model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 model.add(Dropout(dropout))
 
-model.add(Convolution2D(256, 3, 3,border_mode='same',init=weight_init, name='conv2_1'))
+model.add(Convolution2D(256, 3, 3,init=weight_init, name='conv2_1'))
 model.add(BatchNormalization())
 model.add(Activation('relu'))
-model.add(Convolution2D(256, 3, 3,border_mode='same',init=weight_init, name='conv2_2'))
+model.add(Convolution2D(256, 3, 3,init=weight_init, name='conv2_2'))
 model.add(BatchNormalization())
 model.add(Activation('relu'))
-model.add(Convolution2D(256, 3, 3,border_mode='same',init=weight_init, name='conv2_2'))
+model.add(Convolution2D(256, 3, 3,init=weight_init, name='conv2_3'))
 model.add(BatchNormalization())
 model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))  
 model.add(Dropout(dropout))
 
-model.add(Convolution2D(512, 3, 3,border_mode='same', init=weight_init, name='conv3_1'))
+model.add(Convolution2D(512, 3, 3, init=weight_init, name='conv3_1'))
 model.add(BatchNormalization())
 model.add(Activation('relu'))
-model.add(Convolution2D(512, 3, 3,border_mode='same', init=weight_init, name='conv3_2'))
+model.add(Convolution2D(512, 3, 3, init=weight_init, name='conv3_2'))
 model.add(BatchNormalization())
 model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))  
@@ -136,7 +136,7 @@ for i in xrange(n_dataset):
 
     #optimize with adadelta
     model.compile(loss='binary_crossentropy', 
-                 optimizer='adadelta',
+                 optimizer='rmsprop', #adadelta
                  metrics=['accuracy'])
 
     # let's train the model using SGD + momentum (how original).
@@ -171,8 +171,9 @@ for i in xrange(n_dataset):
             #width_shift_range=0.1,  # randomly shift images horizontally (fraction of total width)
             #height_shift_range=0.1,  # randomly shift images vertically (fraction of total height)
             horizontal_flip=True,  # randomly flip images
-            vertical_flip=True)  # randomly flip images
-    
+            vertical_flip=True,  # randomly flip images
+	    fill_mode='nearest')    
+
         # compute quantities required for featurewise normalization
         # (std, mean, and principal components if ZCA whitening is applied)
         datagen.fit(X_train)
