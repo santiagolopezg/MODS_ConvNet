@@ -63,7 +63,7 @@ weight_init = 'he_normal' #['glorot_normal']
 dropout = 0.5 #[0.0, 0.25, 0.5, 0.7]
 batch_size = 24 #[32, 70, 100, 150]
 learning_rate = 0.003 #[0.0001, 0.0003, 0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1, 3]
-#optimizer = ['sgd', 'adadelta']
+optimize = 'rmsprop' #[sgd', 'adadelta']
 
 # input image dimensions
 img_rows, img_cols = 256, 192
@@ -136,7 +136,7 @@ for i in xrange(n_dataset):
 
     #optimize with adadelta
     model.compile(loss='binary_crossentropy', 
-                 optimizer='rmsprop', #adadelta
+                 optimizer= optimize, #adadelta
                  metrics=['accuracy'])
 
     # let's train the model using SGD + momentum (how original).
@@ -172,7 +172,7 @@ for i in xrange(n_dataset):
             #height_shift_range=0.1,  # randomly shift images vertically (fraction of total height)
             horizontal_flip=True,  # randomly flip images
             vertical_flip=True,  # randomly flip images
-	    fill_mode='nearest')    
+            fill_mode='nearest')    
 
         # compute quantities required for featurewise normalization
         # (std, mean, and principal components if ZCA whitening is applied)
@@ -189,6 +189,11 @@ for i in xrange(n_dataset):
     score = model.evaluate(X_test, Y_test, verbose=0)
     print('Test loss:', score[0])
     print('Test accuracy:', score[1])
+    
+    #Save weights
+    name = 'MODS_keras_weights_{0}_{1}_{2}_{3}_{4}.h5'.format(i, weight_init, dropout, optimize, batch_size)
+    model.save_weights(name,overwrite=True)
+    print('weights saved')
 
 model.reset_states()
 
