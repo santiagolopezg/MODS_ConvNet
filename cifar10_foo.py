@@ -194,6 +194,7 @@ for i in xrange(n_dataset):
     name = 'MODS_keras_weights_{0}_{1}_{2}_{3}_{4}.h5'.format(i, weight_init, dropout, optimize, batch_size)
     model.save_weights(name,overwrite=True)
     print('weights saved')
+    model.reset_states()
 
 model.reset_states()
 
