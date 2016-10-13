@@ -9,7 +9,7 @@ from __future__ import print_function
 import keras
 from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, Activation, Flatten
+from keras.layers import Dense, Dropout, SpatialDropout2D, Activation, Flatten
 from keras.layers import Convolution2D, MaxPooling2D
 from keras.optimizers import SGD, adadelta, rmsprop
 from keras.layers.normalization import BatchNormalization
@@ -84,19 +84,21 @@ model.add(Convolution2D(128, 3, 3,
 			init=weight_init, name='conv1_2'))
 model.add(BatchNormalization())
 model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(dropout))
+model.add(SpatialDropout2D(dropout))
 
 model.add(Convolution2D(256, 3, 3,
                         activation='relu', 
                         #border_mode = 'same',
 			init=weight_init, name='conv2_1'))
 model.add(BatchNormalization())
+model.add(SpatialDropout2D(dropout))
 
 model.add(Convolution2D(256, 3, 3,
                         activation='relu', 
                         #border_mode = 'same',
 			init=weight_init, name='conv2_2'))
 model.add(BatchNormalization())
+model.add(SpatialDropout2D(dropout))
 
 model.add(Convolution2D(256, 3, 3,
                         activation='relu',
@@ -104,13 +106,14 @@ model.add(Convolution2D(256, 3, 3,
 			init=weight_init, name='conv2_3'))
 model.add(BatchNormalization())
 model.add(MaxPooling2D(pool_size=(2, 2)))  
-model.add(Dropout(dropout))
+model.add(SpatialDropout2D(dropout))
 
 model.add(Convolution2D(512, 3, 3,
                         activation='relu',
                         #border_mode = 'same',
 			init=weight_init, name='conv3_1'))
 model.add(BatchNormalization())
+model.add(SpatialDropout2D(dropout))
 
 model.add(Convolution2D(512, 3, 3,
                         activation='relu',
@@ -118,14 +121,14 @@ model.add(Convolution2D(512, 3, 3,
 			init=weight_init, name='conv3_2'))
 model.add(BatchNormalization())
 model.add(MaxPooling2D(pool_size=(2, 2)))  
-model.add(Dropout(dropout))
+model.add(SpatialDropout2D(dropout))
 
 model.add(Convolution2D(1024, 3,3,
 			activation='relu',
 			#border_mode='same',
 			init=weight_init, name='conv4_1'))
-
 model.add(BatchNormalization())
+model.add(SpatialDropout2D(dropout))
 
 model.add(Convolution2D(1024, 3,3,
 			activation='relu',
@@ -133,13 +136,12 @@ model.add(Convolution2D(1024, 3,3,
 			init=weight_init, name='conv4_2'))
 model.add(BatchNormalization())
 model.add(MaxPooling2D(pool_size=(2, 2)))  
-model.add(Dropout(dropout))
+model.add(SpatialDropout2D(dropout))
 
-model = Flatten()(model)
+moded.add(Flatten(())
 model.add(Dense(1000, activation='relu'))
 model.add(Dropout(dropout))
 
-model.add(Dropout(dropout))
 model.add(Dense(nb_classes))
 #model.add(Activation('softmax'))
 model.add(Activation('sigmoid'))
