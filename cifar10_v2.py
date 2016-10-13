@@ -138,7 +138,7 @@ model.add(BatchNormalization())
 model.add(MaxPooling2D(pool_size=(2, 2)))  
 model.add(SpatialDropout2D(dropout))
 
-moded.add(Flatten(())
+moded.add(Flatten())
 model.add(Dense(1000, activation='relu'))
 model.add(Dropout(dropout))
 
