@@ -7,6 +7,8 @@ cifar clone with bigger net
 
 from __future__ import print_function
 import keras
+from keras import backend as K
+K.set_image_dim_ordering('th')
 from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, SpatialDropout2D, Activation, Flatten
