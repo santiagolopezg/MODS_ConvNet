@@ -101,9 +101,11 @@ model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))  
 model.add(Dropout(dropout))
 
+model.add(Flatten())
 model.add(Dense(1000, activation = 'relu'))
 model.add(Dropout(dropout))
 
+model.add(Dropout(dropout))
 model.add(Dense(nb_classes))
 #model.add(Activation('softmax'))
 model.add(Activation('sigmoid'))
