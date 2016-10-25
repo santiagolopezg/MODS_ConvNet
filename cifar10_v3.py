@@ -59,7 +59,7 @@ weight_init = 'he_normal' #['glorot_normal']
 #regl1 = [1.0, 0.1, 0.01, 0.001, 0.0]
 #regl2 = [1.0, 0.1, 0.01, 0.001, 0.0]
 dropout = 0.5 #[0.0, 0.25, 0.5, 0.7]
-batch_size = 24 #[32, 70, 100, 150]
+batch_size = 40 #[32, 70, 100, 150]
 learning_rate = 0.003 #[0.0001, 0.0003, 0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1, 3]
 #optimizer = ['sgd', 'adadelta']
 
@@ -124,7 +124,7 @@ for i in xrange(n_dataset):
     #optimize with adadelta
     model.compile(loss='binary_crossentropy', 
                  optimizer='rmsprop', #adadelta
-                 metrics=['accuracy'])
+                 metrics=['accuracy', 'binary_accuracy', 'matthews_correlation', 'fbeta_score'])
 
     # let's train the model using SGD + momentum (how original).
     #sgd = SGD(lr=learning_rate, decay=1e-6, momentum=0.9, nesterov=True)
