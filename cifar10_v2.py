@@ -10,7 +10,8 @@ import keras
 from keras import backend as K
 from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, SpatialDropout2D, Activation, Flatten
+from keras.layers import Dense, Dropout, Activation, Flatten
+from keras.layers import SpatialDropout2D
 from keras.layers import Convolution2D, MaxPooling2D
 from keras.optimizers import SGD, adadelta, rmsprop
 from keras.layers.normalization import BatchNormalization
@@ -60,7 +61,7 @@ weight_init = 'he_normal' #['glorot_normal']
 #regl1 = [1.0, 0.1, 0.01, 0.001, 0.0]
 #regl2 = [1.0, 0.1, 0.01, 0.001, 0.0]
 dropout = 0.5 #[0.0, 0.25, 0.5, 0.7]
-batch_size = 24 #[32, 70, 100, 150]
+batch_size = 16 #[32, 70, 100, 150]
 learning_rate = 0.003 #[0.0001, 0.0003, 0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1, 3]
 #optimizer = ['sgd', 'adadelta']
 
@@ -85,14 +86,12 @@ model.add(Convolution2D(128, 3, 3,
 			init=weight_init, name='conv1_2'))
 model.add(BatchNormalization())
 model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(SpatialDropout2D(dropout))
 
 model.add(Convolution2D(256, 3, 3,
                         activation='relu', 
                         #border_mode = 'same',
 			init=weight_init, name='conv2_1'))
 model.add(BatchNormalization())
-model.add(SpatialDropout2D(dropout))
 
 model.add(Convolution2D(256, 3, 3,
                         activation='relu', 
@@ -106,8 +105,7 @@ model.add(Convolution2D(256, 3, 3,
                         #border_mode = 'same',
 			init=weight_init, name='conv2_3'))
 model.add(BatchNormalization())
-model.add(MaxPooling2D(pool_size=(2, 2)))  
-model.add(SpatialDropout2D(dropout))
+model.add(MaxPooling2D(pool_size=(2, 2)))
 
 model.add(Convolution2D(512, 3, 3,
                         activation='relu',
@@ -122,7 +120,6 @@ model.add(Convolution2D(512, 3, 3,
 			init=weight_init, name='conv3_2'))
 model.add(BatchNormalization())
 model.add(MaxPooling2D(pool_size=(2, 2)))  
-model.add(SpatialDropout2D(dropout))
 
 model.add(Convolution2D(1024, 3,3,
 			activation='relu',
@@ -161,7 +158,7 @@ for i in xrange(n_dataset):
     #optimize with adadelta
     model.compile(loss='binary_crossentropy', 
                  optimizer='rmsprop', #adadelta
-                 metrics=['accuracy'])
+                 metrics=['accuracy', 'binary_accuracy', 'matthews_correlation', 'fbeta_score'])
 
     # let's train the model using SGD + momentum (how original).
     #sgd = SGD(lr=learning_rate, decay=1e-6, momentum=0.9, nesterov=True)
