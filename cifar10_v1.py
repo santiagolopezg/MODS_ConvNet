@@ -102,10 +102,10 @@ model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))  
 model.add(Dropout(dropout))
 
-model.add(Convolution2D(1024, 3,3,border_mode='same',init=weight_init, name='conv4_1'))
+model.add(Convolution2D(1024, 3, 3, init=weight_init, name='conv4_1'))
 model.add(BatchNormalization())
 model.add(Activation('relu'))
-model.add(Convolution2D(1024, 3,3,border_mode='same',init=weight_init, name='conv4_2'))
+model.add(Convolution2D(1024, 3, 3, init=weight_init, name='conv4_2'))
 model.add(BatchNormalization())
 model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))  
@@ -117,7 +117,6 @@ model.add(Dropout(dropout))
 
 model.add(Dropout(dropout))
 model.add(Dense(nb_classes))
-#model.add(Activation('softmax'))
 model.add(Activation('sigmoid'))
 
 for i in xrange(n_dataset):
@@ -186,6 +185,9 @@ for i in xrange(n_dataset):
     score = model.evaluate(X_test, Y_test, verbose=0)
     print('Test loss:', score[0])
     print('Test accuracy:', score[1])
+    name = 'MODS_keras_weights_{0}_{1}_{2}_{3}_{4}.h5'.format(i, weight_init, dropout, optimizer, batch_size)
+    model.save_weights(name,overwrite=True)
+    print('weights saved')
 
 model.reset_states()
 
