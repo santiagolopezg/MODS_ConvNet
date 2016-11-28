@@ -17,6 +17,8 @@ from keras.utils import np_utils
 import cPickle
 import numpy as np
 
+import getpass
+username = getpass.getuser()
 
 def get_data(n_dataset):    
     f = file('MODS_dataset_cv_{0}.pkl'.format(n_dataset),'rb')
@@ -195,7 +197,7 @@ for i in xrange(n_dataset):
     score = model.evaluate(X_test, Y_test, verbose=0)
     print('Test loss:', score[0])
     print('Test accuracy:', score[1])
-    name = 'MODS_keras_weights_{0}_{1}_{2}_{3}_{4}.h5'.format(i, weight_init, dropout, optimizer, batch_size)
+    name = 'MODS_keras_weights_{0}_{1}_{2}_{3}_{4}_{}.h5'.format(i, weight_init, dropout, optimizer, batch_size,username)
     model.save_weights(name,overwrite=True)
     print('weights saved')
 
