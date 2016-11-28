@@ -54,7 +54,7 @@ nb_epoch = 100
 data_augmentation = True
 n_dataset = 5
 weights = 'MODS_keras_weights_0_he_normal_0.5_rmsprop_24.h5'
-use_weights = True
+use_weights = False
 
 #Hyperparameters for tuning
 weight_init = 'he_normal' #['glorot_normal']
@@ -124,7 +124,7 @@ model.add(Activation('sigmoid'))
 
 
 #decides whether to use weights from pre-trained network or start from 0
-if use_weights = True:
+if use_weights == True:
 	model.load_weights(weights)
 else:
 	pass
