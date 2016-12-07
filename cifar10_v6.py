@@ -63,7 +63,7 @@ weight_init = 'he_normal' #['glorot_normal']
 #regl1 = [1.0, 0.1, 0.01, 0.001, 0.0]
 #regl2 = [1.0, 0.1, 0.01, 0.001, 0.0]
 dropout = 0.5 #[0.0, 0.25, 0.5, 0.7]
-batch_size = 24 #[32, 70, 100, 150]
+batch_size = 20 #[32, 70, 100, 150]
 learning_rate = 0.003 #[0.0001, 0.0003, 0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1, 3]
 optimizer = 'rmsprop' #['sgd', 'adadelta']
 
@@ -127,9 +127,9 @@ model.add(Activation('sigmoid'))
 
 #decides whether to use weights from pre-trained network or start from 0
 if use_weights == True:
-	model.load_weights(weights)
+    model.load_weights(weights)
 else:
-	pass
+    pass
 
 for i in xrange(n_dataset):
     # the data, shuffled and split between train and test sets
@@ -197,7 +197,7 @@ for i in xrange(n_dataset):
     score = model.evaluate(X_test, Y_test, verbose=0)
     print('Test loss:', score[0])
     print('Test accuracy:', score[1])
-    name = 'MODS_keras_weights_{0}_{1}_{2}_{3}_{4}_{}.h5'.format(i, weight_init, dropout, optimizer, batch_size,username)
+    name = 'MODS_keras_weights_{0}_{1}_{2}_{3}_{4}_{5}.h5'.format(i, weight_init, dropout, optimizer, batch_size,username)
     model.save_weights(name,overwrite=True)
     print('weights saved')
 
