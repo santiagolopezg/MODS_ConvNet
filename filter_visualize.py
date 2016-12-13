@@ -7,7 +7,7 @@ from __future__ import print_function
 from scipy.misc import imsave
 import numpy as np
 import time
-import cifar10_visualize
+import big_hipster
 from keras import backend as K
 
 # dimensions of the generated pictures for each filter.
@@ -38,7 +38,9 @@ def deprocess_image(x):
 
 
 # build the network with best weights
-model = cifar10_visualize.cifar()
+model = big_hipster.cifar()
+weights='MODS_keras_hipster_weights_3_0.5_rmsprop_40_marr.h5'
+model.load_weights(weights)
 
 print('Model and weights loaded.')
 
