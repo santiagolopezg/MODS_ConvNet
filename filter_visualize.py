@@ -10,6 +10,7 @@ import time
 import big_hipster
 from keras import backend as K
 
+
 # dimensions of the generated pictures for each filter.
 img_width = 128
 img_height = 128
@@ -59,8 +60,8 @@ def normalize(x):
 
 
 kept_filters = []
-for filter_index in range(0, 1024):
-    # scanning 2014 filters
+for filter_index in range(0, 512):
+    # scanning 512 filters
     print('Processing filter %d' % filter_index)
     start_time = time.time()
 
@@ -80,7 +81,7 @@ for filter_index in range(0, 1024):
 
     # this function returns the loss and grads given the input picture
     iterate = K.function([input_img,
-		'1'], #K.learning_phase()],
+		K.learning_phase()],
 		[loss, grads])
 
     # step size for gradient ascent
@@ -88,14 +89,14 @@ for filter_index in range(0, 1024):
 
     # we start from a gray image with some random noise
     if K.image_dim_ordering() == 'th':
-        input_img_data = np.random.random((1, 3, img_width, img_height))
+        input_img_data = np.random.random((1, 1, img_width, img_height))
     else:
         input_img_data = np.random.random((1, img_width, img_height, 3))
     input_img_data = (input_img_data - 0.5) * 20 + 128
 
     # we run gradient ascent for 20 steps
     for i in range(20):
-        loss_value, grads_value = iterate([input_img_data])
+        loss_value, grads_value = iterate([input_img_data, 1])
         input_img_data += grads_value * step
 
         print('Current loss value:', loss_value)
