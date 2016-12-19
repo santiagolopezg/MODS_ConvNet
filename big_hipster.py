@@ -12,7 +12,7 @@ from keras.layers import Input, Dense, Dropout, Activation, Flatten, Convolution
 from keras import backend as K
 from keras.utils import np_utils
 
-def cifar():
+def cifar(): #maybe change border mode, idk; also maybe add BatchNormalization(axis=1)
 
     # Determine proper input shape
     K.set_image_dim_ordering('th')
@@ -23,23 +23,23 @@ def cifar():
     x = Convolution2D(64, 3, 3, activation='relu', border_mode='same', name='conv1_2')(x)
     x = Convolution2D(64, 3, 3, activation='relu', border_mode='same', name='conv1_3')(x)
     x = Convolution2D(64, 3, 3, activation='relu', border_mode='same', name='conv1_4')(x)
-    x = SpatialDropout2D(0.25, dim_ordering='th')(x)
     x = MaxPooling2D((2, 2), strides=(2, 2), name='pool1')(x)
+    x = Dropout(0.25)(x)
 
     x = Convolution2D(128, 3, 3, activation='relu', border_mode='same', name='conv2_1')(x)
     x = Convolution2D(128, 3, 3, activation='relu', border_mode='same', name='conv2_2')(x)
     x = Convolution2D(128, 3, 3, activation='relu', border_mode='same', name='conv2_3')(x)
     x = Convolution2D(128, 3, 3, activation='relu', border_mode='same', name='conv2_4')(x)
-    x = SpatialDropout2D(0.25, dim_ordering='th')(x)
     x = MaxPooling2D((2, 2), strides=(2, 2), name='pool2')(x)
+    x = Dropout(0.25)(x)
 
     x = Convolution2D(256, 3, 3, activation='relu', border_mode='same', name='conv3_1')(x)
     x = Convolution2D(256, 3, 3, activation='relu', border_mode='same', name='conv3_2')(x)
     x = Convolution2D(256, 3, 3, activation='relu', border_mode='same', name='conv3_3')(x)
     x = Convolution2D(256, 3, 3, activation='relu', border_mode='same', name='conv3_4')(x)
     x = Convolution2D(256, 3, 3, activation='relu', border_mode='same', name='conv3_5')(x)
-    x = SpatialDropout2D(0.5, dim_ordering='th')(x)
     x = MaxPooling2D((2, 2), strides=(2, 2), name='pool3')(x)
+    x = Dropout(0.25)(x)
 
     x = Convolution2D(512, 3, 3, activation='relu', border_mode='same', name='conv4_1')(x)
     x = Convolution2D(512, 3, 3, activation='relu', border_mode='same', name='conv4_2')(x)
@@ -47,8 +47,8 @@ def cifar():
     x = Convolution2D(512, 3, 3, activation='relu', border_mode='same', name='conv4_4')(x)
     x = Convolution2D(512, 3, 3, activation='relu', border_mode='same', name='conv4_5')(x)
     x = Convolution2D(512, 3, 3, activation='relu', border_mode='same', name='conv4_6')(x)
-    x = SpatialDropout2D(0.5, dim_ordering='th')(x)
     x = MaxPooling2D((2, 2), strides=(2, 2), name='pool4')(x)
+    x = Dropout(0.25)(x)
 
     x = Flatten(name='flatten')(x)
     x = Dense(1000, activation='relu', name='fc1')(x)
@@ -60,7 +60,7 @@ def cifar():
     # Create model.
     model = Model(img_input, x)
 
-    #weights='MODS_keras_weights_3_he_normal_0.5_rmsprop_24.h5'
+    #weights=''
     #model.load_weights(weights)
 
     return model

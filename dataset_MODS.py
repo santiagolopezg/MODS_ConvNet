@@ -65,12 +65,12 @@ class dataset:
           
           print len(self.data)
           dataset = [self.data, self.data_label]
-          f = file('debug_MODS_data.pkl','wb') ##save images in a pkl
+          f = file('MODS_data.pkl','wb') ##save images in a pkl
           cPickle.dump(dataset, f, protocol=cPickle.HIGHEST_PROTOCOL)
           f.close()
           print(datetime.datetime.now() - self.start_time)
 
-	def Dset(self, ndataset=3, name='debug_MODS_data.pkl'):
+	def Dset(self, ndataset=5, name='MODS_data.pkl'):
          '''
          function to build datasets. ndataset: number of datasets wanted; 
          name: pkl file where the data from DSetGlobal is stored. Code makes sure
@@ -144,53 +144,3 @@ class dataset:
              cPickle.dump(dataset_new, f, protocol=cPickle.HIGHEST_PROTOCOL)
              f.close()
 
-'''       
-	def aug(self, current_image, label, deg):
-         gc.enable
-         data = []
-         data_label = []
-         flip_image = numpy.flipud(current_image)
-         data.append(numpy.hstack(flip_image))         
-         a = numpy.fliplr(flip_image)
-         b = numpy.fliplr(current_image)
-         data.append(numpy.hstack(a))
-         data.append(numpy.hstack(b))
-         data_label += 3*[label]
-         
-         for i in xrange(int(360/deg -1)):
-             data.append(numpy.hstack(tf.rotate(current_image, deg)))
-             data.append(numpy.hstack(tf.rotate(flip_image, deg)))
-             data.append(numpy.hstack(tf.rotate(a, deg)))
-             data.append(numpy.hstack(tf.rotate(b, deg)))
-             data_label += 4*[label]
-         gc.collect()
-         return data, data_label
-
-  
-	def data_augment(self, deg=90.0):
-         for i in xrange(self.ndataset):
-             gc.enable
-             f = file('MODS_dataset_cv_{0}.pkl'.format(i),'rb')
-             data = cPickle.load(f)
-             training = data[0]
-             f.close()
-             for j in xrange(len(training[0])):
-                 current_image = numpy.reshape(training[0][j], (256, 192))
-                 label = training[1][j]
-                 images, labels = self.aug(current_image, label, deg)
-                 training[0] += images
-                 training[1] += labels
-                 gc.collect()
-                 print(j)
-             f = file('MODS_dataset_cv_aug_{0}.pkl'.format(i),'wb')
-             dataset_new = [training, data[1]]
-             cPickle.dump(dataset_new, f, protocol=cPickle.HIGHEST_PROTOCOL)
-             f.close()
-             gc.collect()
-             print('Finished dataset {0}'.format(i))
-                                 
-        
-    		#scipy.misc.imshow(current_image) ##shows the image being read
-		#
-
-'''         
