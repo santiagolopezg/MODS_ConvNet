@@ -41,6 +41,7 @@ class dataset:
           foldername = next(os.walk(directory))[1]
           for dirname in foldername: 
           ##dirname: positive and negative
+	     print datetime.datetime.now()
              f2 = os.path.join(directory,dirname)
              onlyfiles = [ f3 for f3 in os.listdir(f2) if os.path.isfile(os.path.join(f2,f3))]		
              suffix = dirname
@@ -50,8 +51,10 @@ class dataset:
 			label = 0
              for filename in onlyfiles:
                  try: ##reads the image, converts to greyscale, resizes it, appends it to data and adds label too
-                     current_image = scipy.misc.imread(os.path.join(f2,filename), mode='L')
-                     current_image = scipy.misc.imresize(current_image,(256, 192),interp='cubic')
+                     #current_image = scipy.misc.imread(os.path.join(f2,filename), mode='L')
+                     current_image = scipy.misc.imread(os.path.join(f2,filename), mode='RGB')
+                     #current_image = scipy.misc.imresize(current_image,(256, 192),interp='cubic')
+                     current_image = scipy.misc.imresize(current_image,0.25,interp='bicubic')
                      self.data.append(numpy.hstack(current_image))
                      self.data_label.append(label)
                  except IOError: ##If the image can't be read, or is corrupted
@@ -140,7 +143,63 @@ class dataset:
             
              training = [data_join,data_label_join]
              dataset_new = [training,validation]
-             f = file('MODS_dataset_cv_{0}.pkl'.format(i),'wb')
+             f = file('MODS_dataset_rgb_0.25%_{0}.pkl'.format(i),'wb')
              cPickle.dump(dataset_new, f, protocol=cPickle.HIGHEST_PROTOCOL)
              f.close()
 
+
+a = dataset()
+a.DSetGlobal()
+a.Dset()
+a.Djoin()
+
+'''       
+	def aug(self, current_image, label, deg):
+         gc.enable
+         data = []
+         data_label = []
+         flip_image = numpy.flipud(current_image)
+         data.append(numpy.hstack(flip_image))         
+         a = numpy.fliplr(flip_image)
+         b = numpy.fliplr(current_image)
+         data.append(numpy.hstack(a))
+         data.append(numpy.hstack(b))
+         data_label += 3*[label]
+         
+         for i in xrange(int(360/deg -1)):
+             data.append(numpy.hstack(tf.rotate(current_image, deg)))
+             data.append(numpy.hstack(tf.rotate(flip_image, deg)))
+             data.append(numpy.hstack(tf.rotate(a, deg)))
+             data.append(numpy.hstack(tf.rotate(b, deg)))
+             data_label += 4*[label]
+         gc.collect()
+         return data, data_label
+
+  
+	def data_augment(self, deg=90.0):
+         for i in xrange(self.ndataset):
+             gc.enable
+             f = file('MODS_dataset_cv_{0}.pkl'.format(i),'rb')
+             data = cPickle.load(f)
+             training = data[0]
+             f.close()
+             for j in xrange(len(training[0])):
+                 current_image = numpy.reshape(training[0][j], (256, 192))
+                 label = training[1][j]
+                 images, labels = self.aug(current_image, label, deg)
+                 training[0] += images
+                 training[1] += labels
+                 gc.collect()
+                 print(j)
+             f = file('MODS_dataset_cv_aug_{0}.pkl'.format(i),'wb')
+             dataset_new = [training, data[1]]
+             cPickle.dump(dataset_new, f, protocol=cPickle.HIGHEST_PROTOCOL)
+             f.close()
+             gc.collect()
+             print('Finished dataset {0}'.format(i))
+                                 
+        
+    		#scipy.misc.imshow(current_image) ##shows the image being read
+		#
+
+'''         
