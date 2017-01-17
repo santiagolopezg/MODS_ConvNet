@@ -58,7 +58,7 @@ n_dataset = 1
 #regl1 = [1.0, 0.1, 0.01, 0.001, 0.0]
 #regl2 = [1.0, 0.1, 0.01, 0.001, 0.0]
 dropout = 0.5 #[0.0, 0.25, 0.5, 0.7]
-batch_size = 20 #[32, 70, 100, 150]
+batch_size = 16 #[32, 70, 100, 150]
 #learning_rate = 0.003 #[0.0001, 0.0003, 0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1, 3]
 optimizer = 'rmsprop' #['sgd', 'adadelta']
 
@@ -112,8 +112,8 @@ for i in xrange(n_dataset):
     test_datagen.fit(X_test)
 
     #Shows all layers and names
-    for i, layer in enumerate(model.layers):
-	print(i, layer.name)
+    for v, layer in enumerate(model.layers):
+	print(v, layer.name)
  
     model.compile(loss='binary_crossentropy', 
                  optimizer='rmsprop', #adadelta
