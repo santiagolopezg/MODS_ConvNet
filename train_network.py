@@ -17,8 +17,8 @@ username = getpass.getuser()
 from foo_two import foo
 
 
-def get_data():    
-    f = file('MODS_all_data_bw_224_224_0.pkl','rb')
+def get_data(n_dataset):    
+    f = file('MODS_all_data_bw_224_224_{0}.pkl'.format(n_dataset),'rb')
     data = cPickle.load(f)
     f.close()
     training_data = data[0]
@@ -51,14 +51,15 @@ class LossHistory(keras.callbacks.Callback):
 nb_classes = 2
 nb_epoch = 100
 data_augmentation = True
-n_dataset = 1
+n_dataset = 5
+plot_loss = True
 
 #Hyperparameters for tuning
 #weight_init = 'he_normal' #['glorot_normal']
 #regl1 = [1.0, 0.1, 0.01, 0.001, 0.0]
 #regl2 = [1.0, 0.1, 0.01, 0.001, 0.0]
 dropout = 0.5 #[0.0, 0.25, 0.5, 0.7]
-batch_size = 20 #[32, 70, 100, 150]
+batch_size = 16 #[32, 70, 100, 150]
 #learning_rate = 0.003 #[0.0001, 0.0003, 0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1, 3]
 optimizer = 'rmsprop' #['sgd', 'adadelta']
 
@@ -66,7 +67,7 @@ model = foo()
 
 for i in xrange(n_dataset):
     # the data, shuffled and split between train and test sets
-    (X_train, y_train), (X_test, y_test) = get_data()
+    (X_train, y_train), (X_test, y_test) = get_data(i)
     print('X_train shape:', X_train.shape)
     print(X_train.shape[0], 'train samples')
     print(X_test.shape[0], 'test samples')
@@ -138,10 +139,13 @@ for i in xrange(n_dataset):
     model.save_weights(name,overwrite=True)
     print('weights saved')
 
+    if plot_loss:
+	import matplotlib.pylab as plt
+	plt.plot(history.losses,'bo')
+	plt.xlabel('Iteration')
+	plt.ylabel('loss on dataset {0}'.format(i))
+	plt.show()
+	
 model.reset_states()
 
-#import matplotlib.pylab as plt
-#plt.plot(history.losses,'bo')
-#plt.xlabel('Iteration')
-#plt.ylabel('loss')
-#plt.show()
+
