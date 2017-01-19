@@ -18,7 +18,7 @@ from foo_two import foo
 
 
 def get_data():    
-    f = file('MODS_dataset_rgb_224_224_0.pkl','rb')
+    f = file('MODS_all_data_bw_224_224_0.pkl','rb')
     data = cPickle.load(f)
     f.close()
     training_data = data[0]
@@ -32,8 +32,8 @@ def get_data():
     t_label = np.array(t_label)
     v_data = np.array(v_data)
     v_label = np.array(v_label)
-    t_data = t_data.reshape(t_data.shape[0], 3, 224, 224)
-    v_data = v_data.reshape(v_data.shape[0], 3, 224, 224)
+    t_data = t_data.reshape(t_data.shape[0], 1, 224, 224)
+    v_data = v_data.reshape(v_data.shape[0], 1, 224, 224)
     
     #less precision means less memory needed: 64 -> 32 (half the memory used)
     t_data = t_data.astype('float32')
@@ -58,7 +58,7 @@ n_dataset = 1
 #regl1 = [1.0, 0.1, 0.01, 0.001, 0.0]
 #regl2 = [1.0, 0.1, 0.01, 0.001, 0.0]
 dropout = 0.5 #[0.0, 0.25, 0.5, 0.7]
-batch_size = 16 #[32, 70, 100, 150]
+batch_size = 20 #[32, 70, 100, 150]
 #learning_rate = 0.003 #[0.0001, 0.0003, 0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1, 3]
 optimizer = 'rmsprop' #['sgd', 'adadelta']
 
