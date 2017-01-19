@@ -7,6 +7,7 @@ import keras
 from keras.optimizers import SGD, adadelta, rmsprop, adam
 from keras.preprocessing.image import ImageDataGenerator
 from keras.utils import np_utils
+from keras.metrics import matthews_correlation, precision, recall
 
 import cPickle
 import numpy as np
@@ -118,7 +119,7 @@ for i in xrange(n_dataset):
  
     model.compile(loss='binary_crossentropy', 
                  optimizer='rmsprop', #adadelta
-		 metrics=['accuracy'])
+		 metrics=['accuracy', 'matthews_correlation', 'precision', 'recall'])
 
     print('Using real-time data augmentation.')
 
