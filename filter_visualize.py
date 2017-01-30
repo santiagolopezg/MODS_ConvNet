@@ -1,5 +1,5 @@
 '''Adaptation of Keras' 'conv_filter_visualization': 
-Visualization of the filters of VGG16, via gradient ascent in input space.
+Visualization of the filters of foo_two, via gradient ascent in input space.
 '''
 
 
@@ -7,13 +7,13 @@ from __future__ import print_function
 from scipy.misc import imsave
 import numpy as np
 import time
-import big_hipster
+from foo_two import foo
 from keras import backend as K
 
 
 # dimensions of the generated pictures for each filter.
-img_width = 128
-img_height = 128
+img_width = 224
+img_height = 224
 
 # the name of the layer we want to visualize - see model definition
 layer_name = 'conv4_2'
@@ -39,8 +39,8 @@ def deprocess_image(x):
 
 
 # build the network with best weights
-model = big_hipster.cifar()
-weights='MODS_keras_hipster_weights_3_0.5_rmsprop_40_marr.h5'
+model = foo()
+weights='MODS_keras_foo_weights_0_0.5_rmsprop_20_santiago.h5'
 model.load_weights(weights)
 
 print('Model and weights loaded.')
@@ -60,8 +60,8 @@ def normalize(x):
 
 
 kept_filters = []
-for filter_index in range(0, 512):
-    # scanning 512 filters
+for filter_index in range(0, 1024):
+    # scanning 1024 filters
     print('Processing filter %d' % filter_index)
     start_time = time.time()
 

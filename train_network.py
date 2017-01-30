@@ -77,7 +77,6 @@ for i in xrange(n_dataset):
     Y_train = np_utils.to_categorical(y_train, nb_classes)
     Y_test = np_utils.to_categorical(y_test, nb_classes)
 
-
     history = LossHistory()
 
     X_train /= 255
@@ -129,7 +128,8 @@ for i in xrange(n_dataset):
             samples_per_epoch=X_train.shape[0],
             nb_epoch=nb_epoch,
             validation_data=test_datagen.flow(X_test, Y_test, batch_size=batch_size),
-	    nb_val_samples=X_test.shape[0])
+	    nb_val_samples=X_test.shape[0],
+	    callbacks=[history])
 
     print('Finished training network.')
                     
