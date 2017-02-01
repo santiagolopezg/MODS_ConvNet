@@ -26,21 +26,21 @@ def get_data(n_dataset):
     validation_data = data[1]
     t_data = training_data[0]
     t_label = training_data[1]
-    v_data = validation_data[0]
-    v_label = validation_data[1]
+    test_data = validation_data[0]
+    test_label = validation_data[1]
     
     t_data = np.array(t_data)
     t_label = np.array(t_label)
-    v_data = np.array(v_data)
-    v_label = np.array(v_label)
+    test_data = np.array(test_data)
+    test_label = np.array(test_label)
     t_data = t_data.reshape(t_data.shape[0], 1, 224, 224)
-    v_data = v_data.reshape(v_data.shape[0], 1, 224, 224)
+    test_data = test_data.reshape(test_data.shape[0], 1, 224, 224)
     
     #less precision means less memory needed: 64 -> 32 (half the memory used)
     t_data = t_data.astype('float32')
-    v_data = v_data.astype('float32')
+    test_data = test_data.astype('float32')
     
-    return (t_data, t_label), (v_data, v_label)
+    return (t_data, t_label), (test_data, test_label)
 
 class LossHistory(keras.callbacks.Callback):
     def on_train_begin(self, logs={}):
@@ -69,18 +69,29 @@ model = foo()
 for i in xrange(n_dataset):
     # the data, shuffled and split between train and test sets
     (X_train, y_train), (X_test, y_test) = get_data(i)
-    print('X_train shape:', X_train.shape)
-    print(X_train.shape[0], 'train samples')
-    print(X_test.shape[0], 'test samples')
+
+    #take part of the training data for validation
+    X_val = X_train[8500:]
+    X_train = X_train[:8500]
+
+    y_val = y_train[8500:]
+    y_train= y_train[:8500]
     
     # convert class vectors to binary class matrices
     Y_train = np_utils.to_categorical(y_train, nb_classes)
+    Y_val = np_utils.to_categorical(y_val, nb_classes)
     Y_test = np_utils.to_categorical(y_test, nb_classes)
 
     history = LossHistory()
 
     X_train /= 255
+    X_val /= 255
     X_test /= 255
+
+    print('X_train shape:', X_train.shape)
+    print(X_train.shape[0], 'train samples')
+    print(X_val.shape[0], 'validation samples')
+    print(X_test.shape[0], 'test samples')
     
     #data augmentation generator for training, with desired settings
     datagen = ImageDataGenerator(
@@ -97,27 +108,12 @@ for i in xrange(n_dataset):
 	fill_mode='nearest')  
     datagen.fit(X_train)
 
-    #data augmentation generator for testing
-    test_datagen = ImageDataGenerator(
-	featurewise_center=False, 
-	samplewise_center=False,
-	featurewise_std_normalization=False, 
-	samplewise_std_normalization=False,
-	zca_whitening=False,
-	#rotation_range=180,
-	width_shift_range=0.1,
-	height_shift_range=0.1,
-	horizontal_flip=True,
-	vertical_flip=True,
-	fill_mode='nearest')  
-    test_datagen.fit(X_test)
-
     #Shows all layers and names
     for v, layer in enumerate(model.layers):
 	print(v, layer.name)
  
     model.compile(loss='binary_crossentropy', 
-                 optimizer='rmsprop', #adadelta
+                 optimizer= rmsprop(lr=0.0003), #adadelta
 		 metrics=['accuracy', 'matthews_correlation', 'precision', 'recall'])
 
     print('Using real-time data augmentation.')
@@ -127,8 +123,8 @@ for i in xrange(n_dataset):
             batch_size=batch_size),
             samples_per_epoch=X_train.shape[0],
             nb_epoch=nb_epoch,
-            validation_data=test_datagen.flow(X_test, Y_test, batch_size=batch_size),
-	    nb_val_samples=X_test.shape[0],
+            validation_data=(X_val, Y_val), 
+	    nb_val_samples=X_val.shape[0],
 	    callbacks=[history])
 
     print('Finished training network.')
@@ -136,7 +132,7 @@ for i in xrange(n_dataset):
     score = model.evaluate(X_test, Y_test, verbose=1)
     print('Test loss:', score[0])
     print('Test accuracy:', score[1])
-    name = 'MODS_keras_foo_weights_{0}_{1}_{2}_{3}_{4}.h5'.format(i, dropout, optimizer, batch_size,username)
+    name = 'MODS_keras_foo_weights2_{0}_{1}_{2}_{3}_{4}.h5'.format(i, dropout, optimizer, batch_size,username)
     model.save_weights(name,overwrite=True)
     print('weights saved')
 
