@@ -50,7 +50,7 @@ class LossHistory(keras.callbacks.Callback):
         self.losses.append(logs.get('loss'))
         
 nb_classes = 2
-nb_epoch = 100
+nb_epoch = 2
 data_augmentation = True
 n_dataset = 5
 plot_loss = True
@@ -110,8 +110,6 @@ for i in xrange(n_dataset):
     for v, layer in enumerate(model.layers):
 	print(v, layer.name)
 
-    print(model.metrics_names)
-
     print('Training of the network, using real-time data augmentation.')
  
     model.compile(loss='binary_crossentropy', 
@@ -155,9 +153,17 @@ for i in xrange(n_dataset):
 
     if plot_loss:
 	import matplotlib.pylab as plt
-	plt.plot(history.losses,'bo')
+	plt.plot(history.losses,'-k', label='loss')
 	plt.xlabel('Iteration')
 	plt.ylabel('loss on dataset {0}'.format(i))
+	plt.show()
+
+	plt.plot(history.history['acc'])
+	plt.plot(history.history['val_acc'])
+	plt.title('model accuracy')
+	plt.ylabel('accuracy')
+	plt.xlabel('epoch')
+	plt.legend(['train', 'val'], loc='upper left')
 	plt.show()
 	
     model.reset_states()
