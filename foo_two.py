@@ -18,7 +18,6 @@ import numpy as np
 
 dropout = 0.5
 weight_init='he_normal'
-#learning_rate = 0.003
 
 def foo():
 
@@ -78,11 +77,10 @@ def foo():
 
 	model.add(Dropout(dropout))
 	model.add(Dense(2))
-	#model.add(Activation('softmax'))
 	model.add(Activation('sigmoid'))
 
 	try:
-		weights='MODS_keras_foo_weights_0_0.5_rmsprop_20_santiago.h5'
+		weights='MODS_keras_foo_weights_0_0.5_rmsprop_16_david.h5'
 		model.load_weights(weights)
 	except:
 		print ('no weights to load')
