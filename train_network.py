@@ -110,8 +110,6 @@ for i in xrange(n_dataset):
     for v, layer in enumerate(model.layers):
 	print(v, layer.name)
 
-    print(model.metrics_names)
-
     print('Training of the network, using real-time data augmentation.')
  
     model.compile(loss='binary_crossentropy', 
@@ -148,7 +146,7 @@ for i in xrange(n_dataset):
     print(model.metrics_names, score)
     print('Test loss:', score[0])
     print('Test accuracy:', score[1])
-    test_metrics.append(model.metrics_names, score, 'dataset {0}'.format(i))
+    test_metrics.append(score, 'dataset {0}'.format(i))
     name = 'MODS_cut_keras_foo_weights_{0}_{1}_{2}_{3}_{4}.h5'.format(i, dropout, optimizer, batch_size,username)
     model.save_weights(name,overwrite=True)
     print('weights saved')
