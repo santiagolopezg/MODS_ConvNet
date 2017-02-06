@@ -2,6 +2,8 @@
 code to build dataset for ConvNet training on Tuberculosis MODS images.
 Training dataset will have transformations, labels.
 Dataset can be used in Theano or Keras.
+
+Updated to use UPCH images
 """
 
 #import libraries
@@ -29,7 +31,7 @@ class dataset:
 		self.data = []
 		self.data_label = []
 		self.start_time = datetime.datetime.now()
-		self.ndataset = 5
+		self.ndataset = 7
 
 
 	def DSetGlobal(self, directory = '/home/musk/MODS_data/data/shuffled'):
@@ -51,10 +53,10 @@ class dataset:
 			label = 0
              for filename in onlyfiles:
                  try: ##reads the image, converts to greyscale, resizes it, appends it to data and adds label too
-                     #current_image = scipy.misc.imread(os.path.join(f2,filename), mode='L')
-                     current_image = scipy.misc.imread(os.path.join(f2,filename), mode='RGB')
+                     current_image = scipy.misc.imread(os.path.join(f2,filename), mode='L')
+                     #current_image = scipy.misc.imread(os.path.join(f2,filename), mode='RGB')
                      #current_image = scipy.misc.imresize(current_image,(256, 192),interp='cubic')
-                     current_image = scipy.misc.imresize(current_image,0.25,interp='bicubic')
+                     current_image = scipy.misc.imresize(current_image,(224,224),interp='bicubic')
                      self.data.append(numpy.hstack(current_image))
                      self.data_label.append(label)
                  except IOError: ##If the image can't be read, or is corrupted
@@ -67,13 +69,14 @@ class dataset:
           self.data[:], self.data_label[:] = zip(*combined)
           
           print len(self.data)
+
           dataset = [self.data, self.data_label]
           f = file('MODS_data.pkl','wb') ##save images in a pkl
           cPickle.dump(dataset, f, protocol=cPickle.HIGHEST_PROTOCOL)
           f.close()
           print(datetime.datetime.now() - self.start_time)
 
-	def Dset(self, ndataset=5, name='MODS_data.pkl'):
+	def Dset(self, ndataset=7, name='MODS_data.pkl'):
          '''
          function to build datasets. ndataset: number of datasets wanted; 
          name: pkl file where the data from DSetGlobal is stored. Code makes sure
@@ -95,10 +98,10 @@ class dataset:
          size = int(len(y)/float(ndataset))
          while counter < ndataset:
              z = random.sample(y, size)
-             lmda = 0.005
+             lmda = 0.0005
              ratio = float(sum([x[i] for i in z]))/(len([x[i] for i in z if x[i]==0]))
              print(ratio)
-             dif = math.fabs(ratio-0.6218)
+             dif = math.fabs(ratio-1) #ratio of positive to negatives
              if dif < lmda:
                  print('BINGO!', counter, dif)
                  y = [i for i in y if i not in z]
@@ -117,12 +120,12 @@ class dataset:
 	def Djoin(self, name='seg_MODS_data.pkl'):
          '''
          Takes as input segmented data from the Dset function. The data is split into
-         training and validation. Each list (dataset) in the segmented data is taken,
-         once, as the validation set. Then, the rest of the data is shuffled, and put
-         into the training set. Therefore, for each dataset, we have a different validation
+         training and testing. Each list (dataset) in the segmented data is taken,
+         once, as the testing set. Then, the rest of the data is shuffled, and put
+         into the testing set. Therefore, for each dataset, we have a different testing
          set of images, with also a different set of training images, shuffled twice.     
          Returns n datasets (same amount as in Dset). The datasets are made of two lists:
-         training and validation. These lists are made of two lists each: data and labels.
+         training and testing. These lists are made of two lists each: data and labels.
          '''
          f = file(name, 'rb')
          datamama = cPickle.load(f)
@@ -143,63 +146,7 @@ class dataset:
             
              training = [data_join,data_label_join]
              dataset_new = [training,validation]
-             f = file('MODS_dataset_rgb_0.25%_{0}.pkl'.format(i),'wb')
+             f = file('cut_MODS_all_data_bw_224_224_{0}.pkl'.format(i),'wb')
              cPickle.dump(dataset_new, f, protocol=cPickle.HIGHEST_PROTOCOL)
              f.close()
 
-
-a = dataset()
-a.DSetGlobal()
-a.Dset()
-a.Djoin()
-
-'''       
-	def aug(self, current_image, label, deg):
-         gc.enable
-         data = []
-         data_label = []
-         flip_image = numpy.flipud(current_image)
-         data.append(numpy.hstack(flip_image))         
-         a = numpy.fliplr(flip_image)
-         b = numpy.fliplr(current_image)
-         data.append(numpy.hstack(a))
-         data.append(numpy.hstack(b))
-         data_label += 3*[label]
-         
-         for i in xrange(int(360/deg -1)):
-             data.append(numpy.hstack(tf.rotate(current_image, deg)))
-             data.append(numpy.hstack(tf.rotate(flip_image, deg)))
-             data.append(numpy.hstack(tf.rotate(a, deg)))
-             data.append(numpy.hstack(tf.rotate(b, deg)))
-             data_label += 4*[label]
-         gc.collect()
-         return data, data_label
-
-  
-	def data_augment(self, deg=90.0):
-         for i in xrange(self.ndataset):
-             gc.enable
-             f = file('MODS_dataset_cv_{0}.pkl'.format(i),'rb')
-             data = cPickle.load(f)
-             training = data[0]
-             f.close()
-             for j in xrange(len(training[0])):
-                 current_image = numpy.reshape(training[0][j], (256, 192))
-                 label = training[1][j]
-                 images, labels = self.aug(current_image, label, deg)
-                 training[0] += images
-                 training[1] += labels
-                 gc.collect()
-                 print(j)
-             f = file('MODS_dataset_cv_aug_{0}.pkl'.format(i),'wb')
-             dataset_new = [training, data[1]]
-             cPickle.dump(dataset_new, f, protocol=cPickle.HIGHEST_PROTOCOL)
-             f.close()
-             gc.collect()
-             print('Finished dataset {0}'.format(i))
-                                 
-        
-    		#scipy.misc.imshow(current_image) ##shows the image being read
-		#
-
-'''         
