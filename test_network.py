@@ -11,7 +11,8 @@ import getpass
 username = getpass.getuser()
 
 from foo_two import foo
-
+weights='MODS_keras_foo_weights_{0}_0.5_rmsprop_16_david.h5'.format(i)
+model.load_weights(weights)
 
 def get_data(n_dataset):    
     f = file('MODS_all_data_bw_224_224_{0}.pkl'.format(n_dataset),'rb')
@@ -63,6 +64,12 @@ model = foo()
 
 
 for i in xrange(n_dataset):
+
+
+    weights='MODS_keras_foo_weights_{0}_0.5_rmsprop_16_david.h5'.format(i)
+    model.load_weights(weights)
+    print 'using weights from net trained on dataset {0}'. format(i)
+
     history = LossAccHistory()
 
     # the data, shuffled and split between train and test sets
