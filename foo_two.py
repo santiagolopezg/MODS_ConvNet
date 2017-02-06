@@ -80,8 +80,9 @@ def foo():
 	model.add(Activation('sigmoid'))
 
 	try:
-		weights='MODS_keras_foo_weights_0_0.5_rmsprop_16_david.h5'
+		weights='poo_MODS_keras_foo_weights_0_0.5_rmsprop_16_david.h5'
 		model.load_weights(weights)
+		print ('weights loaded')
 	except:
 		print ('no weights to load')
 
