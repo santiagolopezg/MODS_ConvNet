@@ -70,6 +70,15 @@ cvscores = [[],[],[],[],[],[]]
 model = foo()
 
 for i in xrange(n_dataset):
+    #try to load weights corresponding to model trained on this dataset
+
+    try:
+	weights='best_weights_{0}_{1}.h5’.format(i,username)
+	model.load_weights(weights)
+	print ('weights loaded')
+    except:
+	print ('no weights to load')
+
     # the data, shuffled and split between train and test sets
     (X_train, y_train), (X_test, y_test) = get_data(i)
 
@@ -89,7 +98,7 @@ for i in xrange(n_dataset):
 
     history = LossAccHistory()
 
-    checkpoint = ModelCheckpoint('best_weights_{0}_{1}.h5'.format(i, username), monitor='val_acc', verbose=1, save_best_only=True, mode='max')
+    checkpoint = ModelCheckpoint('best_weights_cut_{0}_{1}.h5'.format(i, username), monitor='val_acc', verbose=1, save_best_only=True, mode='max')
 
     X_train /= 255
     X_val /= 255
@@ -150,22 +159,6 @@ for i in xrange(n_dataset):
 
     print('Finished training network.')
                     
-    score = model.evaluate(X_test, Y_test, verbose=1)
-
-    print (model.metrics_names, score)
-
-    print('Test loss:', score[0])
-    print('Test accuracy:', score[1])
-
-
-    if (len(cvscores[0])==0): #if metric names haven't been saved, do so
-	cvscores[0].append(model.metrics_names)
-    else:
-	counter = 1
-	for k in score: #for each test metric, append it to the cvscores list
-		cvscores[counter].append(k)
-		counter +=1
-
     if plot_loss:
 	import matplotlib.pylab as plt
 	plt.plot(history.losses,'-k', label='loss')
@@ -181,24 +174,6 @@ for i in xrange(n_dataset):
 	plt.clf()
 
     model.reset_states()
-
-#calculate mean and stdev for each metric, and append them to test_metrics file
-test_metrics.append(cvscores[0])
-
-for metric in cvscores[1:]:
-	other_counter = 0
-        v = 'test {0}: {1:.4f} +/- {2:.4f}%'.format(cvscores[0][other_counter], np.mean(metric), np.std(metric))
-        print v
-	test_metrics.append(v)
-	other_counter +=1
-
-#save test metrics to txt file
-file = open('cut_MODS_test_metrics.txt', 'w')
-for i in test_metrics:
-	file.write('%s\n' % i)
-file.close()
-
-print test_metrics
 
 
 
