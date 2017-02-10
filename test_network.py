@@ -88,8 +88,6 @@ for i in xrange(n_dataset):
     #Shows all layers and names
     for v, layer in enumerate(model.layers):
 	print(v, layer.name)
-
-    print('Training of the network, using real-time data augmentation.')
  
     model.compile(loss='binary_crossentropy', 
                  optimizer= rmsprop(lr=0.001), #adadelta
@@ -106,7 +104,6 @@ for i in xrange(n_dataset):
 	for k in score: #for each test metric, append it to the cvscores list
 		cvscores[counter].append(k)
 		counter +=1
-
 
     m = (model.metrics_names, score, 'dataset {0}'.format(i))
     test_metrics.append(m)
