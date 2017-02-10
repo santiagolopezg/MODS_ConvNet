@@ -11,11 +11,17 @@ import getpass
 username = getpass.getuser()
 
 from foo_two import foo
-weights='MODS_keras_foo_weights_{0}_0.5_rmsprop_16_david.h5'.format(i)
-model.load_weights(weights)
+
+def get_weights(n_dataset):
+    weights='best_weights_cut_{0}_{1}.h5’.format(i,username)
+    model = foo()
+    model.load_weights(weights)
+    print ('weights loaded')
+    return model
+    
 
 def get_data(n_dataset):    
-    f = file('MODS_all_data_bw_224_224_{0}.pkl'.format(n_dataset),'rb')
+    f = file(‘cut_MODS_all_data_bw_224_224_{0}.pkl'.format(n_dataset),'rb')
     data = cPickle.load(f)
     f.close()
     training_data = data[0]
@@ -65,9 +71,7 @@ model = foo()
 
 for i in xrange(n_dataset):
 
-
-    weights='MODS_keras_foo_weights_{0}_0.5_rmsprop_16_david.h5'.format(i)
-    model.load_weights(weights)
+    model = get_weights(i)
     print 'using weights from net trained on dataset {0}'. format(i)
 
     history = LossAccHistory()
@@ -95,13 +99,29 @@ for i in xrange(n_dataset):
 
     print (model.metrics_names, score)
 
-    print('Test loss:', score[0])
-    print('Test accuracy:', score[1])
+    if (len(cvscores[0])==0): #if metric names haven't been saved, do so
+	cvscores[0].append(model.metrics_names)
+    else:
+	counter = 1
+	for k in score: #for each test metric, append it to the cvscores list
+		cvscores[counter].append(k)
+		counter +=1
+
 
     m = (model.metrics_names, score, 'dataset {0}'.format(i))
     test_metrics.append(m)
 
     model.reset_states()
+
+#calculate mean and stdev for each metric, and append them to test_metrics file
+test_metrics.append(cvscores[0])
+
+for metric in cvscores[1:]:
+	other_counter = 0
+        v = 'test {0}: {1:.4f} +/- {2:.4f}%'.format(cvscores[0][other_counter], np.mean(metric), np.std(metric))
+        print v
+	test_metrics.append(v)
+	other_counter +=1
 
 #save test metrics to txt file
 file = open('cut_MODS_test_metrics.txt', 'w')
@@ -110,8 +130,6 @@ for i in test_metrics:
 file.close()
 
 print test_metrics
-
-
 
 
 
