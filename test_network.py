@@ -44,6 +44,62 @@ def get_data(n_dataset):
     
     return (t_data, t_label), (test_data, test_label)
 
+def test_net(i):
+
+	model = get_weights(i)
+	print 'using weights from net trained on dataset {0}'. format(i)
+	history = LossAccHistory()
+
+    	(X_train, y_train), (X_test, y_test) = get_data(i)
+
+    	Y_test = np_utils.to_categorical(y_test, nb_classes)
+
+    	X_test /= 255
+
+    	print(X_test.shape[0], 'test samples')
+ 
+    	model.compile(loss='binary_crossentropy', 
+                 optimizer= rmsprop(lr=0.001), #adadelta
+		 metrics=['accuracy', 'matthews_correlation', 'precision', 'recall'])
+          
+    	score = model.evaluate(X_test, Y_test, verbose=1)
+
+    	print (model.metrics_names, score)
+
+    	if (len(cvscores[0])==0): #if metric names haven't been saved, do so
+		cvscores[0].append(model.metrics_names)
+    	else:
+		counter = 1
+		for k in score: #for each test metric, append it to the cvscores list
+			cvscores[counter].append(k)
+			counter +=1
+
+    	model.reset_states()
+
+
+def cv_calc():
+#calculate mean and stdev for each metric, and append them to test_metrics file
+	test_metrics.append(cvscores[0])
+
+	for metric in cvscores[1:]:
+		other_counter = 0
+        	v = 'test {0}: {1:.4f} +/- {2:.4f}%'.format(cvscores[0][other_counter], np.mean(metric), np.std(metric))
+        	print v
+		test_metrics.append(v)
+		other_counter +=1
+	return cvscores, test_metrics
+
+def save_metrics(cvscores, test_metrics):
+#save test metrics to txt file
+	file = open('cut_MODS_test_metrics.txt', 'w')
+	file.write(cvscores)
+	for i in test_metrics:
+		file.write('\n%s\n' % i)
+	file.close()
+
+	print test_metrics
+
+
 class LossAccHistory(keras.callbacks.Callback):
     def on_train_begin(self, logs={}):
         self.losses = []
@@ -55,78 +111,26 @@ class LossAccHistory(keras.callbacks.Callback):
         
 nb_classes = 2
 nb_epoch = 100
-data_augmentation = True
 n_dataset = 7
-plot_loss = True
 
-#Hyperparameters for tuning
-
-dropout = 0.5 #[0.0, 0.25, 0.5, 0.7]
-batch_size = 16 #[32, 70, 100, 150]
-optimizer = 'rmsprop' #['sgd', 'adadelta']
+dropout = 0.5
+batch_size = 16 
+optimizer = 'rmsprop' 
 test_metrics = []
+cvscores = [[],[],[],[],[],[]]
+#cvscores = [[metrics],[loss],[acc],[mcc],[precision],[recall]]
 
-model = foo()
-
-
+	
 for i in xrange(n_dataset):
+	test_net(i)
+cvscores, test_metrics = cv_calc()
+save_metrics(cvscores, test_metrics)
 
-    model = get_weights(i)
-    print 'using weights from net trained on dataset {0}'. format(i)
 
-    history = LossAccHistory()
 
-    # the data, shuffled and split between train and test sets
-    (X_train, y_train), (X_test, y_test) = get_data(i)
 
-    Y_test = np_utils.to_categorical(y_test, nb_classes)
 
-    X_test /= 255
 
-    print(X_test.shape[0], 'test samples')
-    
-    #Shows all layers and names
-    for v, layer in enumerate(model.layers):
-	print(v, layer.name)
- 
-    model.compile(loss='binary_crossentropy', 
-                 optimizer= rmsprop(lr=0.001), #adadelta
-		 metrics=['accuracy', 'matthews_correlation', 'precision', 'recall'])
-          
-    score = model.evaluate(X_test, Y_test, verbose=1)
-
-    print (model.metrics_names, score)
-
-    if (len(cvscores[0])==0): #if metric names haven't been saved, do so
-	cvscores[0].append(model.metrics_names)
-    else:
-	counter = 1
-	for k in score: #for each test metric, append it to the cvscores list
-		cvscores[counter].append(k)
-		counter +=1
-
-    m = (model.metrics_names, score, 'dataset {0}'.format(i))
-    test_metrics.append(m)
-
-    model.reset_states()
-
-#calculate mean and stdev for each metric, and append them to test_metrics file
-test_metrics.append(cvscores[0])
-
-for metric in cvscores[1:]:
-	other_counter = 0
-        v = 'test {0}: {1:.4f} +/- {2:.4f}%'.format(cvscores[0][other_counter], np.mean(metric), np.std(metric))
-        print v
-	test_metrics.append(v)
-	other_counter +=1
-
-#save test metrics to txt file
-file = open('cut_MODS_test_metrics.txt', 'w')
-for i in test_metrics:
-	file.write('%s\n' % i)
-file.close()
-
-print test_metrics
 
 
 

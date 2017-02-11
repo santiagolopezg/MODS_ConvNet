@@ -64,8 +64,6 @@ dropout = 0.5 #[0.0, 0.25, 0.5, 0.7]
 batch_size = 72 #[32, 70, 100, 150]
 optimizer = 'rmsprop' #['sgd', 'adadelta']
 test_metrics = []
-cvscores = [[],[],[],[],[],[]]
-#cvscores = [[metrics],[loss],[acc],[mcc],[precision],[recall]]
 
 model = foo()
 
