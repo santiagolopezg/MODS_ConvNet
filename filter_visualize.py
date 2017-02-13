@@ -42,7 +42,7 @@ def deprocess_image(x):
 
 # build the network with best weights
 model = foo()
-weights='best_weights_2_santiago.h5'
+weights='best_weights_cut_0_david.h5'
 model.load_weights(weights)
 
 print('Model and weights loaded.')
@@ -139,4 +139,9 @@ for i in range(n):
                          (img_height + margin) * j: (img_height + margin) * j + img_height, :] = img
 
 # save the result to disk
-imsave('stitched_filters_%dx%d.png' % (n, n), stitched_filters)
+imsave('stitched_filters_{0}_{1}_%dx%d.png'.format(layer_name, weights) % (n, n), stitched_filters)
+
+
+
+
+

@@ -81,18 +81,21 @@ def cv_calc():
 #calculate mean and stdev for each metric, and append them to test_metrics file
 	test_metrics.append(cvscores[0])
 
+	other_counter = 0
 	for metric in cvscores[1:]:
-		other_counter = 0
-        	v = 'test {0}: {1:.4f} +/- {2:.4f}%'.format(cvscores[0][other_counter], np.mean(metric), np.std(metric))
+        	v = 'test {0}: {1:.4f} +/- {2:.4f}%'.format(cvscores[0][0][other_counter], np.mean(metric), np.std(metric))
         	print v
 		test_metrics.append(v)
 		other_counter +=1
+		if other_counter == 5:
+			other_counter=0
 	return cvscores, test_metrics
 
 def save_metrics(cvscores, test_metrics):
 #save test metrics to txt file
-	file = open('cut_MODS_test_metrics.txt', 'w')
-	file.write(cvscores)
+	file = open('MODS_test_metrics.txt', 'w')
+	for j in cvscores:
+		file.write('\n%s\n' % j)
 	for i in test_metrics:
 		file.write('\n%s\n' % i)
 	file.close()
