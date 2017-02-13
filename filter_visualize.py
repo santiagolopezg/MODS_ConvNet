@@ -62,7 +62,7 @@ def normalize(x):
 
 
 #make a list of 50 random filter indexes 
-randsample = random.sample(xrange(512), 50)
+randsample = random.sample(xrange(512), 150)
 
 kept_filters = []
 for filter_index in randsample:
