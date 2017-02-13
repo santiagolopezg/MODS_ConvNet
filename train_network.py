@@ -65,11 +65,10 @@ batch_size = 72 #[32, 70, 100, 150]
 optimizer = 'rmsprop' #['sgd', 'adadelta']
 test_metrics = []
 
-model = foo()
-
 for i in xrange(n_dataset):
+    #call a model instance
+    model = foo()
     #try to load weights corresponding to model trained on this dataset
-
     try:
 	weights='best_weights_poo_{0}_{1}.h5'.format(i,username)
 	model.load_weights(weights)
