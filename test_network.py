@@ -13,7 +13,7 @@ username = getpass.getuser()
 from foo_two import foo
 
 def get_weights(n_dataset):
-    weights='best_weights_cut_{0}_{1}.h5’.format(i,username)
+    weights='best_weights_cut_{0}_{1}.h5'.format(i,username)
     model = foo()
     model.load_weights(weights)
     print ('weights loaded')
@@ -21,7 +21,7 @@ def get_weights(n_dataset):
     
 
 def get_data(n_dataset):    
-    f = file(‘cut_MODS_all_data_bw_224_224_{0}.pkl'.format(n_dataset),'rb')
+    f = file('cut_MODS_all_data_bw_224_224_{0}.pkl'.format(n_dataset),'rb')
     data = cPickle.load(f)
     f.close()
     training_data = data[0]
