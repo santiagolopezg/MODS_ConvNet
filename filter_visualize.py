@@ -7,8 +7,10 @@ from __future__ import print_function
 from scipy.misc import imsave
 import numpy as np
 import time
-from foo_two import foo
+from foo_three import foo
 from keras import backend as K
+
+import random
 
 
 # dimensions of the generated pictures for each filter.
@@ -40,7 +42,7 @@ def deprocess_image(x):
 
 # build the network with best weights
 model = foo()
-weights='MODS_keras_foo_weights_0_0.5_rmsprop_20_santiago.h5'
+weights='best_weights_2_santiago.h5'
 model.load_weights(weights)
 
 print('Model and weights loaded.')
@@ -59,9 +61,12 @@ def normalize(x):
     return x / (K.sqrt(K.mean(K.square(x))) + 1e-5)
 
 
+#make a list of 50 random filter indexes 
+randsample = random.sample(xrange(512), 50)
+
 kept_filters = []
-for filter_index in range(0, 1024):
-    # scanning 1024 filters
+for filter_index in randsample:
+    # scanning 50 filters
     print('Processing filter %d' % filter_index)
     start_time = time.time()
 
