@@ -14,7 +14,7 @@ username = getpass.getuser()
 from foo_three import foo
 
 
-class se-sp(y_true, y_pred):
+class se_sp(y_true, y_pred):
     	def __init__(self):
 		y_pred_pos = K.round(K.clip(y_pred, 0, 1))
     		y_pred_neg = 1 - y_pred_pos
@@ -87,7 +87,7 @@ def test_net(i):
  
     	model.compile(loss='binary_crossentropy', 
                  optimizer= rmsprop(lr=0.001), #adadelta
-		 metrics=['accuracy', 'matthews_correlation', 'precision', 'recall’, se-sp.sens, se-se.spec])
+		 metrics=['accuracy', 'matthews_correlation', 'precision', 'recall', se_sp.sens, se_se.spec])
           
     	score = model.evaluate(X_test, Y_test, verbose=1)
 
@@ -141,7 +141,7 @@ class LossAccHistory(keras.callbacks.Callback):
         
 nb_classes = 2
 nb_epoch = 100
-n_dataset = 3
+n_dataset = 5
 
 dropout = 0.5
 batch_size = 72
