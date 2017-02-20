@@ -3,7 +3,7 @@ from keras.optimizers import SGD, adadelta, rmsprop, adam
 from keras.preprocessing.image import ImageDataGenerator
 from keras.utils import np_utils
 from keras.metrics import matthews_correlation, precision, recall
-import eras.backend as K
+import keras.backend as K
 
 import cPickle
 import numpy as np
@@ -14,28 +14,39 @@ username = getpass.getuser()
 from foo_three import foo
 
 
-class se_sp(y_true, y_pred):
-    	def __init__(self):
-		y_pred_pos = K.round(K.clip(y_pred, 0, 1))
-    		y_pred_neg = 1 - y_pred_pos
+def sens(y_true, y_pred):
 
-   		y_pos = K.round(K.clip(y_true, 0, 1))
-   		y_neg = 1 - y_pos
+	y_pred_pos = K.round(K.clip(y_pred, 0, 1))
+    	y_pred_neg = 1 - y_pred_pos
 
-   		self.tp = K.sum(y_pos * y_pred_pos)
-   		self.tn = K.sum(y_neg * y_pred_neg)
+   	y_pos = K.round(K.clip(y_true, 0, 1))
+   	y_neg = 1 - y_pos
 
-  		self.fp = K.sum(y_neg * y_pred_pos)
-  		self.fn = K.sum(y_pos * y_pred_neg)
+   	tp = K.sum(y_pos * y_pred_pos)
+   	tn = K.sum(y_neg * y_pred_neg)
 
-	def sens(self, y_true, y_pred):
+  	fp = K.sum(y_neg * y_pred_pos)
+  	fn = K.sum(y_pos * y_pred_neg)
 
-		se = self.tp / (self.tp + self.fn)
-		return se
+	se = tp / (tp + fn)
+	return se
 
-	def spec(self, y_true, y_pred):
-		sp = self.tn / (self.fp + self.tn)
-		return sp
+def spec(y_true, y_pred):
+
+	y_pred_pos = K.round(K.clip(y_pred, 0, 1))
+    	y_pred_neg = 1 - y_pred_pos
+
+   	y_pos = K.round(K.clip(y_true, 0, 1))
+   	y_neg = 1 - y_pos
+
+   	tp = K.sum(y_pos * y_pred_pos)
+   	tn = K.sum(y_neg * y_pred_neg)
+
+  	fp = K.sum(y_neg * y_pred_pos)
+  	fn = K.sum(y_pos * y_pred_neg)
+
+	sp = tn / (fp + tn)
+	return sp
 
 
 
@@ -87,7 +98,7 @@ def test_net(i):
  
     	model.compile(loss='binary_crossentropy', 
                  optimizer= rmsprop(lr=0.001), #adadelta
-		 metrics=['accuracy', 'matthews_correlation', 'precision', 'recall', se_sp.sens, se_se.spec])
+		 metrics=['accuracy', 'matthews_correlation', 'precision', 'recall', sens, spec])
           
     	score = model.evaluate(X_test, Y_test, verbose=1)
 
@@ -147,7 +158,7 @@ dropout = 0.5
 batch_size = 72
 optimizer = 'rmsprop' 
 test_metrics = []
-cvscores = [[],[],[],[],[],[]]
+cvscores = [[],[],[],[],[],[], [], []]
 #cvscores = [[metrics],[loss],[acc],[mcc],[precision],[recall], [sens], [spec]]
 
 	
