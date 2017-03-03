@@ -3,6 +3,7 @@ from keras.optimizers import SGD, adadelta, rmsprop, adam
 from keras.preprocessing.image import ImageDataGenerator
 from keras.utils import np_utils
 from keras.metrics import matthews_correlation, precision, recall
+import keras.backend as K
 
 import cPickle
 import numpy as np
@@ -11,6 +12,43 @@ import getpass
 username = getpass.getuser()
 
 from foo_three import foo
+
+
+def sens(y_true, y_pred):
+
+	y_pred_pos = K.round(K.clip(y_pred, 0, 1))
+    	y_pred_neg = 1 - y_pred_pos
+
+   	y_pos = K.round(K.clip(y_true, 0, 1))
+   	y_neg = 1 - y_pos
+
+   	tp = K.sum(y_pos * y_pred_pos)
+   	tn = K.sum(y_neg * y_pred_neg)
+
+  	fp = K.sum(y_neg * y_pred_pos)
+  	fn = K.sum(y_pos * y_pred_neg)
+
+	se = tp / (tp + fn)
+	return se
+
+def spec(y_true, y_pred):
+
+	y_pred_pos = K.round(K.clip(y_pred, 0, 1))
+    	y_pred_neg = 1 - y_pred_pos
+
+   	y_pos = K.round(K.clip(y_true, 0, 1))
+   	y_neg = 1 - y_pos
+
+   	tp = K.sum(y_pos * y_pred_pos)
+   	tn = K.sum(y_neg * y_pred_neg)
+
+  	fp = K.sum(y_neg * y_pred_pos)
+  	fn = K.sum(y_pos * y_pred_neg)
+
+	sp = tn / (fp + tn)
+	return sp
+
+
 
 def get_weights(n_dataset):
     weights='best_weights_{0}_{1}.h5'.format(i,'santiago')
@@ -60,7 +98,7 @@ def test_net(i):
  
     	model.compile(loss='binary_crossentropy', 
                  optimizer= rmsprop(lr=0.001), #adadelta
-		 metrics=['accuracy', 'matthews_correlation', 'precision', 'recall'])
+		 metrics=['accuracy', 'matthews_correlation', 'precision', 'recall', sens, spec])
           
     	score = model.evaluate(X_test, Y_test, verbose=1)
 
@@ -87,7 +125,7 @@ def cv_calc():
         	print v
 		test_metrics.append(v)
 		other_counter +=1
-		if other_counter == 5:
+		if other_counter == 7:
 			other_counter=0
 	return cvscores, test_metrics
 
@@ -114,14 +152,14 @@ class LossAccHistory(keras.callbacks.Callback):
         
 nb_classes = 2
 nb_epoch = 100
-n_dataset = 3
+n_dataset = 5
 
 dropout = 0.5
 batch_size = 72
 optimizer = 'rmsprop' 
 test_metrics = []
-cvscores = [[],[],[],[],[],[]]
-#cvscores = [[metrics],[loss],[acc],[mcc],[precision],[recall]]
+cvscores = [[],[],[],[],[],[], [], []]
+#cvscores = [[metrics],[loss],[acc],[mcc],[precision],[recall], [sens], [spec]]
 
 	
 for i in xrange(n_dataset):
