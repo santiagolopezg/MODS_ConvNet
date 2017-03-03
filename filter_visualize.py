@@ -62,7 +62,7 @@ def normalize(x):
 
 
 #make a list of 50 random filter indexes 
-randsample = random.sample(xrange(512), 150)
+randsample = random.sample(xrange(512), 512)
 
 kept_filters = []
 for filter_index in randsample:
@@ -100,7 +100,7 @@ for filter_index in randsample:
     input_img_data = (input_img_data - 0.5) * 20 + 128
 
     # we run gradient ascent for 20 steps
-    for i in range(20):
+    for i in range(100):
         loss_value, grads_value = iterate([input_img_data, 1])
         input_img_data += grads_value * step
 
@@ -117,7 +117,7 @@ for filter_index in randsample:
     print('Filter %d processed in %ds' % (filter_index, end_time - start_time))
 
 # we will stich the best 64 filters on a 8 x 8 grid.
-n = 8
+n = 5
 
 # the filters that have the highest loss are assumed to be better-looking.
 # we will only keep the top 64 filters.
