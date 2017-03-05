@@ -14,6 +14,7 @@ import random
 
 #flags to determine what to do
 viz=False
+mk_img=True
 
 # dimensions of the generated pictures for each filter.
 img_width = 224
@@ -122,7 +123,7 @@ def filter_viz():
 	    print('Filter %d processed in %ds' % (filter_index, end_time - start_time))
 
 	# we will stich the best 25 filters on a 5 x 5 grid.
-	n = 2
+	n = 7
 
 	# the filters that have the highest loss are assumed to be better-looking.
 	# we will only keep the top 64 filters.
@@ -152,7 +153,7 @@ def max_act(output_index):
 
 	kept_imgs=[]
 
-	for k in xrange(1000):
+	for k in xrange(10):
 	    
 	    # we build a loss function that maximizes the activation
 	    # of the nth filter of the layer considered
@@ -183,7 +184,7 @@ def max_act(output_index):
 		input_img_data = (input_img_data - 0.5) * 20 + 128
 
 		# we run gradient ascent for 100 steps
-		for i in range(100):
+		for i in range(2000):
 		    loss_value, grads_value = iterate([input_img_data, 1])
 		    input_img_data += grads_value * step
 
@@ -200,7 +201,7 @@ def max_act(output_index):
 
 
 	# we will stich the best 49 images on a 7 x 7 grid.
-	n = 7
+	n = 3
 
 	# the filters that have the highest loss are assumed to be better-looking.
 	# we will only keep the top 64 filters.
@@ -221,15 +222,16 @@ def max_act(output_index):
 		stitched_imgs[(img_width + margin) * i: (img_width + margin) * i + img_width,
 		                 (img_height + margin) * j: (img_height + margin) * j + img_height, :] = img
 
-	return stitched_imgs, output_index
+	return stitched_imgs, output_index, n
 
 if viz:
 	stitched_filters, n =filter_viz()
 	# save the result to disk
 	imsave('stitched_filters_{0}_{1}_%dx%d.png'.format(layer_name, weights) % (n, n), stitched_filters)
 
-img,output_index = max_act(1)
-imsave('max_activation_{0}_{1}.png'.format(output_index, weights),img)
+if mk_img:
+	img,output_index,n = max_act(0)
+	imsave('max_activation_{0}_{1}_{2}x{2}.png'.format(output_index, weights, n),img)
 
 
 
