@@ -16,7 +16,7 @@ import numpy as np
 import getpass
 username = getpass.getuser()
 
-from foo_three import foo
+from foo_two import foo
 
 
 def get_data(n_dataset):    
