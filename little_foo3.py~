@@ -29,29 +29,35 @@ def foo():
 
 	model = Sequential()
 
-	model.add(Convolution2D(32, 7, 7,
+	model.add(Convolution2D(32, 8, 8,
 			        input_shape=input_shape,init=weight_init, name='conv1_1'))
 	model.add(BatchNormalization())
 	model.add(Activation('relu'))
-	model.add(Convolution2D(32, 5, 5,init=weight_init, name='conv1_2'))
+	model.add(Convolution2D(32, 6, 6,init=weight_init, name='conv1_2'))
 	model.add(BatchNormalization())
 	model.add(Activation('relu'))
-	model.add(Convolution2D(32, 3, 3,init=weight_init, name='conv1_3'))
+	model.add(Convolution2D(32, 4, 4,init=weight_init, name='conv1_3'))
 	model.add(BatchNormalization())
 	model.add(Activation('relu'))
-	model.add(MaxPooling2D(pool_size=(2, 2))) # in 212, out 106
+	model.add(Convolution2D(32, 2, 2,init=weight_init, name='conv1_4'))
+	model.add(BatchNormalization())
+	model.add(Activation('relu'))
+	model.add(MaxPooling2D(pool_size=(2, 2))) # in 208, out 104
 	model.add(Dropout(dropout))
 
-	model.add(Convolution2D(64, 7, 7,init=weight_init, name='conv2_1'))
+	model.add(Convolution2D(64, 8, 8,init=weight_init, name='conv2_1'))
 	model.add(BatchNormalization())
 	model.add(Activation('relu'))
-	model.add(Convolution2D(64, 5, 5,init=weight_init, name='conv2_2'))
+	model.add(Convolution2D(64, 6, 6,init=weight_init, name='conv2_2'))
 	model.add(BatchNormalization())
 	model.add(Activation('relu'))
-	model.add(Convolution2D(64, 3, 3,init=weight_init, name='conv2_3'))
+	model.add(Convolution2D(64, 4, 4,init=weight_init, name='conv2_3'))
 	model.add(BatchNormalization())
 	model.add(Activation('relu'))
-	model.add(MaxPooling2D(pool_size=(2, 2))) # in is 94, out is 47 
+	model.add(Convolution2D(64, 2, 2,init=weight_init, name='conv2_4'))
+	model.add(BatchNormalization())
+	model.add(Activation('relu'))
+	model.add(MaxPooling2D(pool_size=(2, 2))) # in is 88, out is 44 
 	model.add(Dropout(dropout))
 
 	model.add(Flatten())
