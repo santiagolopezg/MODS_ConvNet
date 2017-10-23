@@ -51,7 +51,7 @@ def spec(y_true, y_pred):
 
 
 def get_weights(n_dataset):
-    weights='best_weights_lilfoo_{0}_{1}.h5'.format(i,'santiago')
+    weights='best_weights_lilfoo_{0}_{1}.h5'.format(i,username)
     model = foo()
     model.load_weights(weights)
     print ('weights loaded')
