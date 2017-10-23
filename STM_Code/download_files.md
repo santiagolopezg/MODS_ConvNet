@@ -8,9 +8,9 @@ Below are the links (Google Drive) to files needed to replicate the results repo
         
        
 ### 2lab_CNN models
-* link to download weights for the filter visualization and image generation: https://drive.google.com/uc?export=download&id=       
+* link to download weights for the filter visualization and image generation (3 weight files, 1 per 2lab_CNN model): https://drive.google.com/uc?export=download&id=       
 * link to download weights for the five 2lab_CNN_1 models: https://drive.google.com/uc?export=download&id=     
 * link to download weights for the five 2lab_CNN_2 models: https://drive.google.com/uc?export=download&id=     
 * link to download weights for the five 2lab_CNN_3 models: https://drive.google.com/uc?export=download&id=     
 * link to download synthetically generated images:         
-* link to download filters of resc_CNN model:        
+* link to download filters of 2lab_CNN model:        
