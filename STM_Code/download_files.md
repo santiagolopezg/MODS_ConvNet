@@ -13,8 +13,8 @@ Below are the links (Google Drive) to files needed to replicate the results repo
 * link to download synthetically generated images and filters: https://drive.google.com/uc?export=download&id=17s0BcYBjodpqo6B2wi-XvLcJInIJX48T       
 
 ### resc_CNN datasets      
-* link to download resc_CNN datasets 0-4 (5 models) for training and testing (5 datasets): 
+* link to download resc_CNN datasets 0-4 (5 models) for training and testing (5 datasets): https://drive.google.com/uc?export=download&id=0B8c8rHDbaNImVVNrak45TFZfS0U
 
 ### 2lab_CNN datasets         
-* link to download 2lab_CNN datasets 0-2 (3 models) for training and testing (10 datasets per 2lab_CNN model: 5 train + 5 test):          
+* link to download 2lab_CNN datasets 0-2 (3 models) for training and testing (10 datasets per 2lab_CNN model: 5 train + 5 test): https://drive.google.com/uc?export=download&id=1OpSKdSMOXq3cDiWdprobb1R8Jv4YSZIb      
 
