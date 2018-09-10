@@ -1,3 +1,4 @@
+import math
 import keras
 from keras.optimizers import SGD, adadelta, rmsprop, adam
 from keras.preprocessing.image import ImageDataGenerator
@@ -13,45 +14,26 @@ username = getpass.getuser()
 
 from foo_three import foo
 
+def contingency(y_true, y_pred):
+	tp = 0
+	tn = 0
+	fp = 0
+	fn = 0
+	for i in xrange(len(y_true)):
+		if y_true[i] == 0: #if true label is negative:
+			if y_pred[i] == y_true[i]: #if pred label = true label = neg:
+				tn += 1 #its truly negative
+			elif y_pred[i] == 1: # if pred label is pos, but real is neg:
+				fp += 1 #its a false positive 
+		elif y_true[i] == 1: #if true label is possy:
+			if y_pred[i] == y_true[i]: # if pred label = true label = possy:
+				tp += 1
+			elif y_pred[i] == 0: # if pred label is neg but real is possy:
+				fn += 1
+	return tp, tn, fp, fn
 
-def sens(y_true, y_pred):
-
-	y_pred_pos = K.round(K.clip(y_pred, 0, 1))
-    	y_pred_neg = 1 - y_pred_pos
-
-   	y_pos = K.round(K.clip(y_true, 0, 1))
-   	y_neg = 1 - y_pos
-
-   	tp = K.sum(y_pos * y_pred_pos)
-   	tn = K.sum(y_neg * y_pred_neg)
-
-  	fp = K.sum(y_neg * y_pred_pos)
-  	fn = K.sum(y_pos * y_pred_neg)
-
-	se = tp / (tp + fn)
-	return se
-
-def spec(y_true, y_pred):
-
-	y_pred_pos = K.round(K.clip(y_pred, 0, 1))
-    	y_pred_neg = 1 - y_pred_pos
-
-   	y_pos = K.round(K.clip(y_true, 0, 1))
-   	y_neg = 1 - y_pos
-
-   	tp = K.sum(y_pos * y_pred_pos)
-   	tn = K.sum(y_neg * y_pred_neg)
-
-  	fp = K.sum(y_neg * y_pred_pos)
-  	fn = K.sum(y_pos * y_pred_neg)
-
-	sp = tn / (fp + tn)
-	return sp
-
-
-
-def get_weights(n_dataset):
-    weights='best_weights_labcrossval_{0}_{1}_{2}.h5'.format(i, name, username)
+def get_weights(i, name):
+    weights='best_weights_labcrossval_{0}_train_1_{1}.h5'.format(i, username)
     model = foo()
     model.load_weights(weights)
     print ('weights loaded')
@@ -76,7 +58,6 @@ def get_data(n_dataset, name):
     t_data = t_data.reshape(t_data.shape[0], 1, 224, 224)
     test_data = test_data.reshape(test_data.shape[0], 1, 224, 224)
     
-    #less precision means less memory needed: 64 -> 32 (half the memory used)
     t_data = t_data.astype('float32')
     test_data = test_data.astype('float32')
     
@@ -88,7 +69,7 @@ def test_net(i, name):
 	print 'using weights from net trained on dataset {0} for {1}'. format(i, name)
 	history = LossAccHistory()
 
-    	(X_train, y_train), (X_test, y_test) = get_data(i)
+    	(X_train, y_train), (X_test, y_test) = get_data(i, name)
 
     	Y_test = np_utils.to_categorical(y_test, nb_classes)
 
@@ -99,33 +80,42 @@ def test_net(i, name):
     	model.compile(loss='binary_crossentropy', 
                  optimizer= rmsprop(lr=0.001), #adadelta
 		 metrics=['accuracy', 'matthews_correlation', 'precision', 'recall', sens, spec])
-          
-    	score = model.evaluate(X_test, Y_test, verbose=1)
+        
+	ypred = model.predict_classes(X_test, verbose=1)
+	ytrue = Y_test	
 
-    	print (model.metrics_names, score)
+	
+	tp, tn, fp, fn = contingency(y_test, ypred)
 
-    	if (len(cvscores[0])==0): #if metric names haven't been saved, do so
-		cvscores[0].append(model.metrics_names)
-    	else:
-		counter = 1
-		for k in score: #for each test metric, append it to the cvscores list
-			cvscores[counter].append(k)
-			counter +=1
+	print '           |     true label\n---------------------------------'
+	print 'pred label |  positive | negative'
+	print 'positive   |     ', tp, ' |  ', fp
+	print 'negative   |     ', fn, '  |  ', tn 
+
+	prec = float(tp)/(tp+fp)
+	se = float(tp) / (tp + fn)
+	sp = float(tn) / (fp + tn)
+	mcc = float(tp*tn - tp*fn)/(math.sqrt((tp + fp)*(tp+fn)*(tn+fp)*(tn+fn)))
+	f1 = (2*prec*se)/(prec+se)
+	acc = float(tp+tn)/(tp+tn+fp+fn)
+	print '     sens     |     spec     |     mcc      |      f1      |      prec      |     acc       '
+	print se, sp, mcc, f1, prec, acc
 
     	model.reset_states()
+	return [se, sp, mcc, f1, prec, acc]
 
 
-def cv_calc():
+def cv_calc(cvscores):
 #calculate mean and stdev for each metric, and append them to test_metrics file
 	test_metrics.append(cvscores[0])
 
 	other_counter = 0
 	for metric in cvscores[1:]:
-        	v = 'test {0}: {1:.4f} +/- {2:.4f}%'.format(cvscores[0][0][other_counter], np.mean(metric), np.std(metric))
+        	v = 'test {0}: {1:.4f} +/- {2:.4f}%'.format(cvscores[0][other_counter], np.mean(metric), np.std(metric))
         	print v
 		test_metrics.append(v)
 		other_counter +=1
-		if other_counter == 7:
+		if other_counter == 6:
 			other_counter=0
 	return cvscores, test_metrics
 
@@ -161,51 +151,15 @@ test_metrics = []
 cvscores = [[],[],[],[],[],[], [], []]
 #cvscores = [[metrics],[loss],[acc],[mcc],[precision],[recall], [sens], [spec]]
 
-	
-for i in xrange(n_dataset):
-	for name in ['test_1', 'test_2', 'test_3']:
-		test_net(i,  name)
-cvscores, test_metrics = cv_calc()
-print cvscores, test_metrics
-save_metrics(cvscores, test_metrics)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+for name in ['test_1', 'test_2', 'test_3']:
+	manualcalc = [['sens', 'spec', 'mcc', 'f1', 'prec', 'acc'], [], [], [], [], [], []]
+	#manualcalc = [[metrics], [sens], [spec], [mcc], [f1], [prec], [acc]]
+	for i in xrange(n_dataset): # 5 datasets	
+		scorez = test_net(i, name)
+		for i in xrange(len(manualcalc[1:])):
+			#print i
+			manualcalc[i+1].append(scorez[i])
+	print manualcalc
+	cvscores, test_metrics = cv_calc(manualcalc)
+	print 'test set ', name
+	print cvscores, test_metrics
