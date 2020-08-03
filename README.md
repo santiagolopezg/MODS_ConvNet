@@ -4,6 +4,6 @@ Images used are obtained from MODS inverted microscopy. Base network will be tra
 
 **Collaborators:**
 
- * Santiago López Garnier
+ * Santiago C. López
  * Josue Ortega Caro 
 
